@@ -24,6 +24,7 @@ class Scanner:
         self.text = text
         self.current_char = ''
         self.current_position = -1
+        self.current_line = 1
         self.next_char()
 
     def next_char(self):
@@ -40,10 +41,21 @@ class Scanner:
 
     def scan(self):
         token = self.get_next_token()
-        (token_type, lexeme) = token
-        while token_type != TokenType.EOF:
-            print(token)
-            token = self.get_next_token()
+        if token is not None:
+            (token_type, lexeme) = token
+            while token_type != TokenType.EOF and token is not None:
+                print(token)
+
+                if token_type == TokenType.KEYWORD or token_type == TokenType.ID:
+                    if lexeme not in self.symbol_table:
+                        self.symbol_table.append(lexeme)
+
+                if self.current_line not in self.tokens:
+                    self.tokens[self.current_line] = []
+                self.tokens[self.current_line].append((token_type.name, lexeme))
+
+                token = self.get_next_token()
+                (token_type, lexeme) = token
 
     def get_next_token(self):
         token = None
@@ -57,13 +69,13 @@ class Scanner:
                 if self.look_ahead() == '=':
                     last_char = self.current_char
                     self.next_char()
-                    token = (last_char + self.current_char, TokenType.SYMBOL)
+                    token = (TokenType.SYMBOL, last_char + self.current_char)
                 else:
-                    token = (self.current_char, TokenType.SYMBOL)
+                    token = (TokenType.SYMBOL, self.current_char)
             else:
-                token = (self.current_char, TokenType.SYMBOL)
+                token = (TokenType.SYMBOL, self.current_char)
         elif self.current_char == '\0':
-            token = ('', TokenType.EOF)
+            token = (TokenType.EOF, '')
         else:
             # Unknown token!
             sys.exit("Lexing error. " + 'Unknown token')
@@ -80,7 +92,7 @@ class Scanner:
 def main():
     with open('input.txt', 'r') as file:
         # text = file.read()
-        text = '+- */'
+        text = '+-= =*'
         scanner = Scanner(text)
         scanner.scan()
 
