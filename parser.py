@@ -162,7 +162,94 @@ class Sets:
     }
 
     STATES = {
-        0: [(NonTerminals.DECLARATION, 1), ('$', 2)]
+        0: {NonTerminals.DECLARATION_LIST: 1, '$': 100},
+        1: {NonTerminals.DECLARATION: 2, NonTerminals.DECLARATION_LIST: 1, '': 100},
+        2: {NonTerminals.DECLARATION_INITIAL: 3, NonTerminals.DECLARATION_PRIME: 4},
+        3: {NonTerminals.TYPE_SPECIFIER: 7, TokenType.ID: 100},
+        4: {NonTerminals.FUN_DECLARATION_PRIME: 6, NonTerminals.VAR_DECLARATION_PRIME: 5},
+        5: {';': 100, '[': 100, TokenType.NUM: 100, ']': 100},
+        6: {'(': 100, NonTerminals.PARAMS: 8, ')': 100, NonTerminals.COMPOUND_STMT: 12},
+        7: {'int': 100, 'void': 100},
+        8: {}
+    }
+
+    TRANSITIONS = {
+        0: [{NonTerminals.DECLARATION_LIST: 1, '$': -1}],
+        1: [{NonTerminals.DECLARATION: 2, NonTerminals.DECLARATION_LIST: 1},
+            {'': -1}],
+        2: [{NonTerminals.DECLARATION_INITIAL: 3, NonTerminals.DECLARATION_PRIME: 4}],
+        3: [{NonTerminals.TYPE_SPECIFIER: 7, TokenType.ID: -1}],
+        4: [{NonTerminals.FUN_DECLARATION_PRIME: 6},
+            {NonTerminals.VAR_DECLARATION_PRIME: 5}],
+        5: [{';': 100},
+            {'[': -1, TokenType.NUM: -1, ']': -1, ';': -1}],
+        6: [{'(': -1, NonTerminals.PARAMS: 8, ')': -1, NonTerminals.COMPOUND_STMT: 12}],
+        7: [{'int': -1, 'void': -1}],
+        8: [{'int': -1, TokenType.ID: -1, NonTerminals.PARAM_PRIME: 11, NonTerminals.PARAM_LIST: 9},
+            {'void': -1}],
+        9: [{',': -1, NonTerminals.PARAM: 10, NonTerminals.PARAM_LIST: 9},
+            {'': -1}],
+        10: [{NonTerminals.DECLARATION_INITIAL: 3, NonTerminals.PARAM_PRIME: 11}],
+        11: [{'[': -1, ']': -1},
+             {'': -1}],
+        12: [{'{': -1, NonTerminals.DECLARATION_LIST: 1, NonTerminals.STATEMENT_LIST: 13, '}': -1}],
+        13: [{NonTerminals.STATEMENT: 14, NonTerminals.STATEMENT_LIST: 13},
+             {'': -1}],
+        14: [{NonTerminals.EXPRESSION_STMT: 15},
+             {NonTerminals.COMPOUND_STMT: 12},
+             {NonTerminals.SELECTION_STMT: 16},
+             {NonTerminals.ITERATION_STMT: 18},
+             {NonTerminals.RETURN_STMT: 19}],
+        15: [{NonTerminals.EXPRESSION: 21, ';': -1},
+             {'break': -1, ';': -1},
+             {';': -1}],
+        16: [{'if': -1, '(': -1, NonTerminals.EXPRESSION: 21, ')': -1, NonTerminals.STATEMENT: 14, NonTerminals.ELSE_STMT: 17}],
+        17: [{'endif': -1},
+             {'else': -1, NonTerminals.STATEMENT: 14, 'endif': -1}],
+        18: [{'repeat': -1, NonTerminals.STATEMENT: 14, 'until': -1, '(': -1, NonTerminals.EXPRESSION: 21, ')': -1}],
+        19: [{'return': -1, NonTerminals.RETURN_STMT_PRIME: 20}],
+        20: [{';': -1},
+             {NonTerminals.EXPRESSION: 21, ';': -1}],
+        21: [{NonTerminals.SIMPLE_EXPRESSION_ZEGOND: 24},
+             {TokenType.ID: -1, NonTerminals.B: 22}],
+        22: [{NonTerminals.EXPRESSION: 21},
+             {'[': -1, NonTerminals.EXPRESSION: 21, ']': -1, NonTerminals.H: 23},
+             {NonTerminals.SIMPLE_EXPRESSION_PRIME: 25}],
+        23: [{NonTerminals.EXPRESSION: 21},
+             {NonTerminals.G: 36, NonTerminals.D: 31, NonTerminals.C: 26}],
+        24: [{NonTerminals.ADDITIVE_EXPRESSION_ZEGOND: 30, NonTerminals.C: 26}],
+        25: [{NonTerminals.ADDITIVE_EXPRESSION_PRIME: 29, NonTerminals.C: 26}],
+        26: [{NonTerminals.RELOP: 27, NonTerminals.ADDITIVE_EXPRESSION: 28},
+             {'': -1}],
+        27: [{'<': -1},
+             {'==': -1}],
+        28: [],
+        29: [{NonTerminals.TERM_PRIME: 34, NonTerminals.D: 31}],
+        30: [{NonTerminals.TERM_ZEGOND: 35, NonTerminals.D: 31}],
+        31: [{NonTerminals.ADDOP: 32, NonTerminals.TERM: 33, NonTerminals.D: 31}],
+        32: [{'+': -1},
+             {'-': -1}],
+        33: [{NonTerminals.FACTOR: 37, NonTerminals.G: 36}],
+        34: [{NonTerminals.FACTOR_PRIME: 40, NonTerminals.G: 36}],
+        35: [{NonTerminals.FACTOR_ZEGOND: 41, NonTerminals.G: 36}],
+        36: [{'*': -1, NonTerminals.FACTOR: 37, NonTerminals.G: 36},
+             {'': -1}],
+        37: [{'(': -1, NonTerminals.EXPRESSION: 21, ')': -1},
+             {TokenType.ID: -1, NonTerminals.VAR_CALL_PRIME: 38},
+             {TokenType.NUM: -1}],
+        38: [{'(': -1, NonTerminals.ARGS: 42, ')': -1},
+             {NonTerminals.VAR_PRIME: 39}],
+        39: [{'[': -1, NonTerminals.EXPRESSION: 21, ']': -1},
+             {'': -1}],
+        40: [{'(': -1, NonTerminals.ARGS: 42, ')': -1},
+             {'': -1}],
+        41: [{'(': -1, NonTerminals.EXPRESSION: 21, ')': -1},
+             {TokenType.NUM: -1}],
+        42: [{NonTerminals.ARG_LIST: 43},
+             {'': -1}],
+        43: [{NonTerminals.EXPRESSION: 21, NonTerminals.ARG_LIST_PRIME: 44}],
+        44: [{',': -1, NonTerminals.EXPRESSION: 21, NonTerminals.ARG_LIST_PRIME: 44},
+             {'': -1}]
     }
 
 
@@ -192,7 +279,8 @@ class Parser:
                         self.add_error(f'illegal {lexeme}')
                         self.state = self.parse(s, non_terminal)
                     else:
-                        self.add_error(f'missing {e}')  # should be replaced by a token that can be derived from e
+                        # should be replaced by a token that can be derived from e
+                        self.add_error(f'missing {e}')
                         return state
             else:
                 if e == lexeme:
