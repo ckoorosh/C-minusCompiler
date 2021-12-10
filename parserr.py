@@ -178,14 +178,15 @@ class Sets:
         1: [{NonTerminals.DECLARATION: 2, NonTerminals.DECLARATION_LIST: 1},
             {'': -1}],
         2: [{NonTerminals.DECLARATION_INITIAL: 3, NonTerminals.DECLARATION_PRIME: 4}],
-        3: [{NonTerminals.TYPE_SPECIFIER: 7, TokenType.ID: -1}],
-        4: [{NonTerminals.FUN_DECLARATION_PRIME: 6},
-            {NonTerminals.VAR_DECLARATION_PRIME: 5}],
-        5: [{';': 100},
-            {'[': -1, TokenType.NUM: -1, ']': -1, ';': -1}],
+        3: [{NonTerminals.TYPE_SPECIFIER: 7, 'ID': -1}],
+        4: [{NonTerminals.VAR_DECLARATION_PRIME: 5},
+            {NonTerminals.FUN_DECLARATION_PRIME: 6}],
+        5: [{';': -1},
+            {'[': -1, 'NUM': -1, ']': -1, ';': -1}],
         6: [{'(': -1, NonTerminals.PARAMS: 8, ')': -1, NonTerminals.COMPOUND_STMT: 12}],
-        7: [{'int': -1, 'void': -1}],
-        8: [{'int': -1, TokenType.ID: -1, NonTerminals.PARAM_PRIME: 11, NonTerminals.PARAM_LIST: 9},
+        7: [{'int': -1},
+            {'void': -1}],
+        8: [{'int': -1, 'ID': -1, NonTerminals.PARAM_PRIME: 11, NonTerminals.PARAM_LIST: 9},
             {'void': -1}],
         9: [{',': -1, NonTerminals.PARAM: 10, NonTerminals.PARAM_LIST: 9},
             {'': -1}],
@@ -203,7 +204,8 @@ class Sets:
         15: [{NonTerminals.EXPRESSION: 21, ';': -1},
              {'break': -1, ';': -1},
              {';': -1}],
-        16: [{'if': -1, '(': -1, NonTerminals.EXPRESSION: 21, ')': -1, NonTerminals.STATEMENT: 14, NonTerminals.ELSE_STMT: 17}],
+        16: [{'if': -1, '(': -1, NonTerminals.EXPRESSION: 21, ')': -1, NonTerminals.STATEMENT: 14,
+              NonTerminals.ELSE_STMT: 17}],
         17: [{'endif': -1},
              {'else': -1, NonTerminals.STATEMENT: 14, 'endif': -1}],
         18: [{'repeat': -1, NonTerminals.STATEMENT: 14, 'until': -1, '(': -1, NonTerminals.EXPRESSION: 21, ')': -1}],
@@ -211,7 +213,7 @@ class Sets:
         20: [{';': -1},
              {NonTerminals.EXPRESSION: 21, ';': -1}],
         21: [{NonTerminals.SIMPLE_EXPRESSION_ZEGOND: 24},
-             {TokenType.ID: -1, NonTerminals.B: 22}],
+             {'ID': -1, NonTerminals.B: 22}],
         22: [{NonTerminals.EXPRESSION: 21},
              {'[': -1, NonTerminals.EXPRESSION: 21, ']': -1, NonTerminals.H: 23},
              {NonTerminals.SIMPLE_EXPRESSION_PRIME: 25}],
@@ -223,7 +225,7 @@ class Sets:
              {'': -1}],
         27: [{'<': -1},
              {'==': -1}],
-        28: [],
+        28: [{NonTerminals.TERM: 33, NonTerminals.D: 31}],
         29: [{NonTerminals.TERM_PRIME: 34, NonTerminals.D: 31}],
         30: [{NonTerminals.TERM_ZEGOND: 35, NonTerminals.D: 31}],
         31: [{NonTerminals.ADDOP: 32, NonTerminals.TERM: 33, NonTerminals.D: 31}],
@@ -235,8 +237,8 @@ class Sets:
         36: [{'*': -1, NonTerminals.FACTOR: 37, NonTerminals.G: 36},
              {'': -1}],
         37: [{'(': -1, NonTerminals.EXPRESSION: 21, ')': -1},
-             {TokenType.ID: -1, NonTerminals.VAR_CALL_PRIME: 38},
-             {TokenType.NUM: -1}],
+             {'ID': -1, NonTerminals.VAR_CALL_PRIME: 38},
+             {'NUM': -1}],
         38: [{'(': -1, NonTerminals.ARGS: 42, ')': -1},
              {NonTerminals.VAR_PRIME: 39}],
         39: [{'[': -1, NonTerminals.EXPRESSION: 21, ']': -1},
@@ -244,7 +246,7 @@ class Sets:
         40: [{'(': -1, NonTerminals.ARGS: 42, ')': -1},
              {'': -1}],
         41: [{'(': -1, NonTerminals.EXPRESSION: 21, ')': -1},
-             {TokenType.NUM: -1}],
+             {'NUM': -1}],
         42: [{NonTerminals.ARG_LIST: 43},
              {'': -1}],
         43: [{NonTerminals.EXPRESSION: 21, NonTerminals.ARG_LIST_PRIME: 44}],
@@ -257,70 +259,114 @@ class Parser:
     def __init__(self, scanner):
         self.scanner = scanner
         self.errors = []
-        self.parse_tree = Node("Program")
+        self.parse_tree = Node('Program')
         self.state = 0
         self.current_token = None
+        self.get_next_token()
 
     def get_next_token(self):
         self.current_token = self.scanner.get_next_token()
-    
-    def get_next_lexeme(self):
-        self.get_next_token()
+
+    def get_current_lexeme(self):
         token, lexeme = self.current_token
         if token == TokenType.NUM or token == TokenType.ID:
-            lexeme = token
+            lexeme = token.name
         return lexeme
 
-    def parse(self, state, non_terminal):
+    def get_next_lexeme(self):
         self.get_next_token()
-        token, lexeme = self.current_token
-        if token == TokenType.NUM or token == TokenType.ID:
-            lexeme = token
-        if Sets.STATES[self.state]:
-            e, s = Sets.STATES[self.state][0]
-            if e in Sets.FIRST_SETS:  # e is non-terminal
-                if lexeme in Sets.FIRST_SETS[e]:
-                    self.state = self.parse(self.state, e)
-                else:
-                    if e not in Sets.FOLLOW_SETS[non_terminal]:
-                        self.add_error(f'illegal {lexeme}')
-                        self.state = self.parse(s, non_terminal)
-                    else:
-                        # should be replaced by a token that can be derived from e
-                        self.add_error(f'missing {e}')
-                        return state
+        return self.get_current_lexeme()
+
+    def get_path(self, state):
+        for path in Sets.TRANSITIONS[state]:
+            edge = list(path.keys())[0]
+            next_state = path[edge]
+            if next_state != -1:
+                if self.get_current_lexeme() in Sets.FIRST_SETS[edge]:
+                    return path
             else:
-                if e == lexeme:
-                    self.state = s
+                if self.get_current_lexeme() == edge:
+                    return path
+        return Sets.TRANSITIONS[state][0]
+
+    def parse(self, state):
+        path = self.get_path(state)
+        print(f'Entering {NonTerminals(state).name} with token "{self.current_token[1]}"')
+        print(f'And choosing path {path}')
+
+        for edge in path:
+            next_state = path[edge]
+            lexeme = self.get_current_lexeme()
+            if next_state != -1:  # non-terminal
+                if lexeme in Sets.FIRST_SETS[edge]:
+                    self.parse(next_state)
                 else:
-                    self.add_error(f'missing {e}')
-                    return state
-        else:
-            return state
+                    if '' in Sets.FIRST_SETS[edge]:
+                        continue
+                    else:
+                        self.add_error(f'missing {edge.name}')
+                        print(f'missing {edge.name}')
+            else:  # terminal
+                if lexeme == edge:
+                    if edge == '$':
+                        return
+                    else:
+                        self.get_next_token()
+                        continue
+                else:
+                    self.add_error(f'missing {edge}')
+                    print(f'missing {edge.name}')
+                    self.get_next_token()
+
+        lexeme = self.get_current_lexeme()
+        while lexeme not in Sets.FOLLOW_SETS[NonTerminals(state)]:
+            self.add_error(f'illegal {lexeme}')
+            print(f'illegal {lexeme}')
+            lexeme = self.get_next_lexeme()
+
+        print(f'returning from {NonTerminals(state)} with token {lexeme} ...')
+
+        #     if non_terminal in Sets.FIRST_SETS:  # e is non-terminal
+        #         if lexeme in Sets.FIRST_SETS[e]:
+        #             self.state = self.parse(self.state, e)
+        #         else:
+        #             if e not in Sets.FOLLOW_SETS[non_terminal]:
+        #                 self.add_error(f'illegal {lexeme}')
+        #                 self.state = self.parse(s, non_terminal)
+        #             else:
+        #                 # should be replaced by a token that can be derived from e
+        #                 self.add_error(f'missing {e}')
+        #                 return state
+        #     else:
+        #         if e == lexeme:
+        #             self.state = s
+        #         else:
+        #             self.add_error(f'missing {e}')
+        #             return state
+        # else:
+        #     return state
 
     def parse2(self, state):
         for path in Sets.TRANSITIONS[self.state]:
             flag = 0
             for node in path.keys():
                 lexeme = self.get_next_lexeme()
-                if(path[node] != -1):
+                if (path[node] != -1):
                     if lexeme in Sets.FIRST_SETS[node]:
                         self.parse2(path[node])
-                         #add to parse tree??!!
+                        # add to parse tree??!!
                     else:
                         flag = 1
-                        break #todo
+                        break  # todo
                 else:
-                    if(lexeme != node):
+                    if (lexeme != node):
                         flag = 1
-                        break #todo
-                    #add to parse tree??!!
-                
-            if flag == 0: #a successful path found
-                #add to parse tree??!!
-                pass
+                        break  # todo
+                    # add to parse tree??!!
 
-                
+            if flag == 0:  # a successful path found
+                # add to parse tree??!!
+                pass
 
     def add_error(self, error):
         self.errors.append((self.scanner.current_line, error))
