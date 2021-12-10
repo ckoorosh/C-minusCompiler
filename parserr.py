@@ -250,6 +250,7 @@ class Parser:
         self.state = 0
         self.current_token = None
         self.get_next_token()
+        self.eof_error = False
 
     def get_next_token(self):
         self.current_token = self.scanner.get_next_token()
@@ -287,6 +288,8 @@ class Parser:
             if next_state != -1:  # non-terminal
                 if lexeme in Sets.FIRST_SETS[edge]:
                     self.parse(next_state)
+                    if self.eof_error:
+                        return
                 else:
                     if '' in Sets.FIRST_SETS[edge]:
                         continue
@@ -303,11 +306,15 @@ class Parser:
                 else:
                     self.add_error(f'missing {edge}')
                     print(f'missing {edge}')
-                    self.get_next_token()
 
         lexeme = self.get_current_lexeme()
         while lexeme not in Sets.FOLLOW_SETS[NonTerminals(state)]:
-            self.add_error(f'illegal {lexeme}')
+            if lexeme == '$':
+                self.add_error('Unexpected EOF')
+                self.eof_error = True
+                break
+            else:
+                self.add_error(f'illegal {lexeme}')
             print(f'illegal {lexeme}')
             lexeme = self.get_next_lexeme()
 
