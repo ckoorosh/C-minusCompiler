@@ -53,7 +53,7 @@ class NonTerminals(enum.Enum):
 
 class Sets:
     FIRST_SETS = {
-        NonTerminals.PROGRAM: ['int', 'void'],
+        NonTerminals.PROGRAM: ['int', 'void', '$'],
         NonTerminals.DECLARATION_LIST: ['int', 'void', ''],
         NonTerminals.DECLARATION: ['int', 'void'],
         NonTerminals.DECLARATION_INITIAL: ['int', 'void'],
@@ -75,8 +75,8 @@ class Sets:
         NonTerminals.RETURN_STMT: ['return'],
         NonTerminals.RETURN_STMT_PRIME: ['ID', ';', 'NUM', '('],
         NonTerminals.EXPRESSION: ['ID', 'NUM', '('],
-        NonTerminals.B: ['ID', '[', 'NUM', '(', '<', '==', '+', '-', '*', ''],
-        NonTerminals.H: ['ID', 'NUM', '(', '<', '==', '+', '-', '*', ''],
+        NonTerminals.B: ['=', '[', '(', '<', '==', '+', '-', '*', ''],
+        NonTerminals.H: ['=', '<', '==', '+', '-', '*', ''],
         NonTerminals.SIMPLE_EXPRESSION_ZEGOND: ['NUM', '('],
         NonTerminals.SIMPLE_EXPRESSION_PRIME: ['(', '<', '==', '+', '-', '*', ''],
         NonTerminals.C: ['<', '==', ''],
@@ -101,40 +101,39 @@ class Sets:
     }
 
     FOLLOW_SETS = {
-        NonTerminals.PROGRAM: ['$'],
-        NonTerminals.DECLARATION_LIST: ['ID', ';', 'NUM', '(', '{', '}', 'break', 'if', 'repeat',
-                                        'return', '$'],
-        NonTerminals.DECLARATION: ['ID', ';', 'NUM', '(', 'int', 'void', '{', '}', 'break', 'if',
-                                   'repeat', 'return', '$'],
+        NonTerminals.PROGRAM: [],
+        NonTerminals.DECLARATION_LIST: ['$', '{', 'break', ';', 'if', 'repeat', 'return', 'ID', '(', 'NUM', '}'],
+        NonTerminals.DECLARATION: ['int', 'void', '$', '{', 'break', ';', 'if', 'repeat', 'return', 'ID', '(', 'NUM',
+                                   '}'],
         NonTerminals.DECLARATION_INITIAL: [';', '[', '(', ')', ','],
-        NonTerminals.DECLARATION_PRIME: ['ID', ';', 'NUM', '(', 'int', 'void', '{', '}', 'break',
-                                         'if', 'repeat', 'return', '$'],
-        NonTerminals.VAR_DECLARATION_PRIME: ['ID', ';', 'NUM', '(', 'int', 'void', '{', '}', 'break',
-                                             'if', 'repeat', 'return', '$'],
-        NonTerminals.FUN_DECLARATION_PRIME: ['ID', ';', 'NUM', '(', 'int', 'void', '{', '}', 'break',
-                                             'if', 'repeat', 'return', '$'],
+        NonTerminals.DECLARATION_PRIME: ['int', 'void', '$', '{', 'break', ';', 'if', 'repeat', 'return', 'ID', '(',
+                                         'NUM', '}'],
+        NonTerminals.VAR_DECLARATION_PRIME: ['int', 'void', '$', '{', 'break', ';', 'if', 'repeat', 'return', 'ID', '(',
+                                             'NUM', '}'],
+        NonTerminals.FUN_DECLARATION_PRIME: ['int', 'void', '$', '{', 'break', ';', 'if', 'repeat', 'return', 'ID', '(',
+                                             'NUM', '}'],
         NonTerminals.TYPE_SPECIFIER: ['ID'],
         NonTerminals.PARAMS: [')'],
         NonTerminals.PARAM_LIST: [')'],
         NonTerminals.PARAM: [')', ','],
         NonTerminals.PARAM_PRIME: [')', ','],
-        NonTerminals.COMPOUND_STMT: ['ID', ';', 'NUM', '(', 'int', 'void', '{', '}', 'break', 'if',
-                                     'endif', 'else', 'until', 'repeat', 'return', '$'],
+        NonTerminals.COMPOUND_STMT: ['int', 'void', '$', '{', 'break', ';', 'if', 'repeat', 'return', 'ID', '(', 'NUM',
+                                     '}', 'endif', 'else', 'until'],
         NonTerminals.STATEMENT_LIST: ['}'],
-        NonTerminals.STATEMENT: ['ID', ';', 'NUM', '(', '{', '}', 'break', 'if', 'endif', 'else',
-                                 'until', 'repeat', 'return'],
-        NonTerminals.EXPRESSION_STMT: ['ID', ';', 'NUM', '(', '{', '}', 'break', 'if', 'endif',
-                                       'else', 'until', 'repeat', 'return'],
-        NonTerminals.SELECTION_STMT: ['ID', ';', 'NUM', '(', '{', '}', 'break', 'if', 'endif', 'else',
-                                      'until', 'repeat', 'return'],
-        NonTerminals.ELSE_STMT: ['ID', ';', 'NUM', '(', '{', '}', 'break', 'if', 'endif', 'else',
-                                 'until', 'repeat', 'return'],
-        NonTerminals.ITERATION_STMT: ['ID', ';', 'NUM', '(', '{', '}', 'break', 'if', 'endif', 'else',
-                                      'until', 'repeat', 'return'],
-        NonTerminals.RETURN_STMT: ['ID', ';', 'NUM', '(', '{', '}', 'break', 'if', 'endif', 'else',
-                                   'until', 'repeat', 'return'],
-        NonTerminals.RETURN_STMT_PRIME: ['ID', ';', 'NUM', '(', '{', '}', 'break', 'if', 'endif',
-                                         'else', 'until', 'repeat', 'return'],
+        NonTerminals.STATEMENT: ['{', 'break', ';', 'if', 'repeat', 'return', 'ID', '(', 'NUM', '}', 'endif', 'else',
+                                 'until'],
+        NonTerminals.EXPRESSION_STMT: ['{', 'break', ';', 'if', 'repeat', 'return', 'ID', '(', 'NUM', '}', 'endif',
+                                       'else', 'until'],
+        NonTerminals.SELECTION_STMT: ['{', 'break', ';', 'if', 'repeat', 'return', 'ID', '(', 'NUM', '}', 'endif',
+                                      'else', 'until'],
+        NonTerminals.ELSE_STMT: ['{', 'break', ';', 'if', 'repeat', 'return', 'ID', '(', 'NUM', '}', 'endif', 'else',
+                                 'until'],
+        NonTerminals.ITERATION_STMT: ['{', 'break', ';', 'if', 'repeat', 'return', 'ID', '(', 'NUM', '}', 'endif',
+                                      'else', 'until'],
+        NonTerminals.RETURN_STMT: ['{', 'break', ';', 'if', 'repeat', 'return', 'ID', '(', 'NUM', '}', 'endif', 'else',
+                                   'until'],
+        NonTerminals.RETURN_STMT_PRIME: ['{', 'break', ';', 'if', 'repeat', 'return', 'ID', '(', 'NUM', '}', 'endif',
+                                         'else', 'until'],
         NonTerminals.EXPRESSION: [';', ']', ')', ','],
         NonTerminals.B: [';', ']', ')', ','],
         NonTerminals.H: [';', ']', ')', ','],
@@ -159,18 +158,6 @@ class Sets:
         NonTerminals.ARGS: [')'],
         NonTerminals.ARG_LIST: [')'],
         NonTerminals.ARG_LIST_PRIME: [')']
-    }
-
-    STATES = {
-        0: {NonTerminals.DECLARATION_LIST: 1, '$': 100},
-        1: {NonTerminals.DECLARATION: 2, NonTerminals.DECLARATION_LIST: 1, '': 100},
-        2: {NonTerminals.DECLARATION_INITIAL: 3, NonTerminals.DECLARATION_PRIME: 4},
-        3: {NonTerminals.TYPE_SPECIFIER: 7, TokenType.ID: 100},
-        4: {NonTerminals.FUN_DECLARATION_PRIME: 6, NonTerminals.VAR_DECLARATION_PRIME: 5},
-        5: {';': 100, '[': 100, TokenType.NUM: 100, ']': 100},
-        6: {'(': 100, NonTerminals.PARAMS: 8, ')': 100, NonTerminals.COMPOUND_STMT: 12},
-        7: {'int': 100, 'void': 100},
-        8: {}
     }
 
     TRANSITIONS = {
@@ -214,10 +201,10 @@ class Sets:
              {NonTerminals.EXPRESSION: 21, ';': -1}],
         21: [{NonTerminals.SIMPLE_EXPRESSION_ZEGOND: 24},
              {'ID': -1, NonTerminals.B: 22}],
-        22: [{NonTerminals.EXPRESSION: 21},
+        22: [{'=': -1, NonTerminals.EXPRESSION: 21},
              {'[': -1, NonTerminals.EXPRESSION: 21, ']': -1, NonTerminals.H: 23},
              {NonTerminals.SIMPLE_EXPRESSION_PRIME: 25}],
-        23: [{NonTerminals.EXPRESSION: 21},
+        23: [{'=': -1, NonTerminals.EXPRESSION: 21},
              {NonTerminals.G: 36, NonTerminals.D: 31, NonTerminals.C: 26}],
         24: [{NonTerminals.ADDITIVE_EXPRESSION_ZEGOND: 30, NonTerminals.C: 26}],
         25: [{NonTerminals.ADDITIVE_EXPRESSION_PRIME: 29, NonTerminals.C: 26}],
@@ -315,7 +302,7 @@ class Parser:
                         continue
                 else:
                     self.add_error(f'missing {edge}')
-                    print(f'missing {edge.name}')
+                    print(f'missing {edge}')
                     self.get_next_token()
 
         lexeme = self.get_current_lexeme()
