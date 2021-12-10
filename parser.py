@@ -263,6 +263,13 @@ class Parser:
 
     def get_next_token(self):
         self.current_token = self.scanner.get_next_token()
+    
+    def get_next_lexeme(self):
+        self.get_next_token()
+        token, lexeme = self.current_token
+        if token == TokenType.NUM or token == TokenType.ID:
+            lexeme = token
+        return lexeme
 
     def parse(self, state, non_terminal):
         self.get_next_token()
@@ -290,6 +297,30 @@ class Parser:
                     return state
         else:
             return state
+
+    def parse2(self, state):
+        for path in Sets.TRANSITIONS[self.state]:
+            flag = 0
+            for node in path.keys():
+                lexeme = self.get_next_lexeme()
+                if(path[node] != -1):
+                    if lexeme in Sets.FIRST_SETS[node]:
+                        self.parse2(path[node])
+                         #add to parse tree??!!
+                    else:
+                        flag = 1
+                        break #todo
+                else:
+                    if(lexeme != node):
+                        flag = 1
+                        break #todo
+                    #add to parse tree??!!
+                
+            if flag == 0: #a successful path found
+                #add to parse tree??!!
+                pass
+
+                
 
     def add_error(self, error):
         self.errors.append((self.scanner.current_line, error))
