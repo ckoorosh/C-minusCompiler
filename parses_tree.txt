@@ -1,0 +1,362 @@
+PROGRAM
+├── DECLARATION_LIST
+│   ├── DECLARATION
+│   │   ├── DECLARATION_INITIAL
+│   │   │   ├── TYPE_SPECIFIER
+│   │   │   │   └── (KEYWORD, int)
+│   │   │   └── (ID, f)
+│   │   └── DECLARATION_PRIME
+│   │       └── FUN_DECLARATION_PRIME
+│   │           ├── (SYMBOL, ()
+│   │           ├── PARAMS
+│   │           │   ├── (KEYWORD, int)
+│   │           │   ├── (ID, a)
+│   │           │   ├── PARAM_PRIME
+│   │           │   │   └── epsilon
+│   │           │   └── PARAM_LIST
+│   │           │       └── epsilon
+│   │           ├── (SYMBOL, ))
+│   │           └── COMPOUND_STMT
+│   │               ├── (SYMBOL, {)
+│   │               ├── DECLARATION_LIST
+│   │               │   ├── DECLARATION
+│   │               │   │   ├── DECLARATION_INITIAL
+│   │               │   │   │   ├── TYPE_SPECIFIER
+│   │               │   │   │   │   └── (KEYWORD, void)
+│   │               │   │   │   └── (ID, g)
+│   │               │   │   └── DECLARATION_PRIME
+│   │               │   │       └── FUN_DECLARATION_PRIME
+│   │               │   │           ├── (SYMBOL, ()
+│   │               │   │           ├── PARAMS
+│   │               │   │           │   ├── (KEYWORD, int)
+│   │               │   │           │   ├── (ID, b)
+│   │               │   │           │   ├── PARAM_PRIME
+│   │               │   │           │   │   └── epsilon
+│   │               │   │           │   └── PARAM_LIST
+│   │               │   │           │       └── epsilon
+│   │               │   │           ├── (SYMBOL, ))
+│   │               │   │           └── COMPOUND_STMT
+│   │               │   │               ├── (SYMBOL, {)
+│   │               │   │               ├── DECLARATION_LIST
+│   │               │   │               │   └── epsilon
+│   │               │   │               ├── STATEMENT_LIST
+│   │               │   │               │   ├── STATEMENT
+│   │               │   │               │   │   └── EXPRESSION_STMT
+│   │               │   │               │   │       ├── EXPRESSION
+│   │               │   │               │   │       │   ├── (ID, output)
+│   │               │   │               │   │       │   └── B
+│   │               │   │               │   │       │       └── SIMPLE_EXPRESSION_PRIME
+│   │               │   │               │   │       │           ├── ADDITIVE_EXPRESSION_PRIME
+│   │               │   │               │   │       │           │   ├── TERM_PRIME
+│   │               │   │               │   │       │           │   │   ├── FACTOR_PRIME
+│   │               │   │               │   │       │           │   │   │   ├── (SYMBOL, ()
+│   │               │   │               │   │       │           │   │   │   ├── ARGS
+│   │               │   │               │   │       │           │   │   │   │   └── ARG_LIST
+│   │               │   │               │   │       │           │   │   │   │       ├── EXPRESSION
+│   │               │   │               │   │       │           │   │   │   │       │   ├── (ID, b)
+│   │               │   │               │   │       │           │   │   │   │       │   └── B
+│   │               │   │               │   │       │           │   │   │   │       │       └── SIMPLE_EXPRESSION_PRIME
+│   │               │   │               │   │       │           │   │   │   │       │           ├── ADDITIVE_EXPRESSION_PRIME
+│   │               │   │               │   │       │           │   │   │   │       │           │   ├── TERM_PRIME
+│   │               │   │               │   │       │           │   │   │   │       │           │   │   ├── FACTOR_PRIME
+│   │               │   │               │   │       │           │   │   │   │       │           │   │   │   └── epsilon
+│   │               │   │               │   │       │           │   │   │   │       │           │   │   └── G
+│   │               │   │               │   │       │           │   │   │   │       │           │   │       └── epsilon
+│   │               │   │               │   │       │           │   │   │   │       │           │   └── D
+│   │               │   │               │   │       │           │   │   │   │       │           │       └── epsilon
+│   │               │   │               │   │       │           │   │   │   │       │           └── C
+│   │               │   │               │   │       │           │   │   │   │       │               └── epsilon
+│   │               │   │               │   │       │           │   │   │   │       └── ARG_LIST_PRIME
+│   │               │   │               │   │       │           │   │   │   │           └── epsilon
+│   │               │   │               │   │       │           │   │   │   └── (SYMBOL, ))
+│   │               │   │               │   │       │           │   │   └── G
+│   │               │   │               │   │       │           │   │       └── epsilon
+│   │               │   │               │   │       │           │   └── D
+│   │               │   │               │   │       │           │       └── epsilon
+│   │               │   │               │   │       │           └── C
+│   │               │   │               │   │       │               └── epsilon
+│   │               │   │               │   │       └── (SYMBOL, ;)
+│   │               │   │               │   └── STATEMENT_LIST
+│   │               │   │               │       ├── STATEMENT
+│   │               │   │               │       │   └── EXPRESSION_STMT
+│   │               │   │               │       │       ├── EXPRESSION
+│   │               │   │               │       │       │   ├── (ID, f)
+│   │               │   │               │       │       │   └── B
+│   │               │   │               │       │       │       └── SIMPLE_EXPRESSION_PRIME
+│   │               │   │               │       │       │           ├── ADDITIVE_EXPRESSION_PRIME
+│   │               │   │               │       │       │           │   ├── TERM_PRIME
+│   │               │   │               │       │       │           │   │   ├── FACTOR_PRIME
+│   │               │   │               │       │       │           │   │   │   ├── (SYMBOL, ()
+│   │               │   │               │       │       │           │   │   │   ├── ARGS
+│   │               │   │               │       │       │           │   │   │   │   └── ARG_LIST
+│   │               │   │               │       │       │           │   │   │   │       ├── EXPRESSION
+│   │               │   │               │       │       │           │   │   │   │       │   ├── (ID, b)
+│   │               │   │               │       │       │           │   │   │   │       │   └── B
+│   │               │   │               │       │       │           │   │   │   │       │       └── SIMPLE_EXPRESSION_PRIME
+│   │               │   │               │       │       │           │   │   │   │       │           ├── ADDITIVE_EXPRESSION_PRIME
+│   │               │   │               │       │       │           │   │   │   │       │           │   ├── TERM_PRIME
+│   │               │   │               │       │       │           │   │   │   │       │           │   │   ├── FACTOR_PRIME
+│   │               │   │               │       │       │           │   │   │   │       │           │   │   │   └── epsilon
+│   │               │   │               │       │       │           │   │   │   │       │           │   │   └── G
+│   │               │   │               │       │       │           │   │   │   │       │           │   │       └── epsilon
+│   │               │   │               │       │       │           │   │   │   │       │           │   └── D
+│   │               │   │               │       │       │           │   │   │   │       │           │       ├── ADDOP
+│   │               │   │               │       │       │           │   │   │   │       │           │       │   └── (SYMBOL, -)
+│   │               │   │               │       │       │           │   │   │   │       │           │       ├── TERM
+│   │               │   │               │       │       │           │   │   │   │       │           │       │   ├── FACTOR
+│   │               │   │               │       │       │           │   │   │   │       │           │       │   │   ├── (ID, b)
+│   │               │   │               │       │       │           │   │   │   │       │           │       │   │   └── VAR_CALL_PRIME
+│   │               │   │               │       │       │           │   │   │   │       │           │       │   │       └── VAR_PRIME
+│   │               │   │               │       │       │           │   │   │   │       │           │       │   │           └── epsilon
+│   │               │   │               │       │       │           │   │   │   │       │           │       │   └── G
+│   │               │   │               │       │       │           │   │   │   │       │           │       │       └── epsilon
+│   │               │   │               │       │       │           │   │   │   │       │           │       └── D
+│   │               │   │               │       │       │           │   │   │   │       │           │           └── epsilon
+│   │               │   │               │       │       │           │   │   │   │       │           └── C
+│   │               │   │               │       │       │           │   │   │   │       │               └── epsilon
+│   │               │   │               │       │       │           │   │   │   │       └── ARG_LIST_PRIME
+│   │               │   │               │       │       │           │   │   │   │           └── epsilon
+│   │               │   │               │       │       │           │   │   │   └── (SYMBOL, ))
+│   │               │   │               │       │       │           │   │   └── G
+│   │               │   │               │       │       │           │   │       └── epsilon
+│   │               │   │               │       │       │           │   └── D
+│   │               │   │               │       │       │           │       └── epsilon
+│   │               │   │               │       │       │           └── C
+│   │               │   │               │       │       │               └── epsilon
+│   │               │   │               │       │       └── (SYMBOL, ;)
+│   │               │   │               │       └── STATEMENT_LIST
+│   │               │   │               │           └── epsilon
+│   │               │   │               └── (SYMBOL, })
+│   │               │   └── DECLARATION_LIST
+│   │               │       └── epsilon
+│   │               ├── STATEMENT_LIST
+│   │               │   ├── STATEMENT
+│   │               │   │   └── SELECTION_STMT
+│   │               │   │       ├── (KEYWORD, if)
+│   │               │   │       ├── (SYMBOL, ()
+│   │               │   │       ├── EXPRESSION
+│   │               │   │       │   ├── (ID, a)
+│   │               │   │       │   └── B
+│   │               │   │       │       └── SIMPLE_EXPRESSION_PRIME
+│   │               │   │       │           ├── ADDITIVE_EXPRESSION_PRIME
+│   │               │   │       │           │   ├── TERM_PRIME
+│   │               │   │       │           │   │   ├── FACTOR_PRIME
+│   │               │   │       │           │   │   │   └── epsilon
+│   │               │   │       │           │   │   └── G
+│   │               │   │       │           │   │       └── epsilon
+│   │               │   │       │           │   └── D
+│   │               │   │       │           │       └── epsilon
+│   │               │   │       │           └── C
+│   │               │   │       │               └── RELOP
+│   │               │   │       │                   └── (SYMBOL, ==)
+│   │               │   │       ├── (SYMBOL, ))
+│   │               │   │       ├── STATEMENT
+│   │               │   │       │   └── COMPOUND_STMT
+│   │               │   │       │       ├── (SYMBOL, {)
+│   │               │   │       │       ├── DECLARATION_LIST
+│   │               │   │       │       │   └── epsilon
+│   │               │   │       │       ├── STATEMENT_LIST
+│   │               │   │       │       │   ├── STATEMENT
+│   │               │   │       │       │   │   └── EXPRESSION_STMT
+│   │               │   │       │       │   │       ├── EXPRESSION
+│   │               │   │       │       │   │       │   ├── (ID, output)
+│   │               │   │       │       │   │       │   └── B
+│   │               │   │       │       │   │       │       └── SIMPLE_EXPRESSION_PRIME
+│   │               │   │       │       │   │       │           ├── ADDITIVE_EXPRESSION_PRIME
+│   │               │   │       │       │   │       │           │   ├── TERM_PRIME
+│   │               │   │       │       │   │       │           │   │   ├── FACTOR_PRIME
+│   │               │   │       │       │   │       │           │   │   │   ├── (SYMBOL, ()
+│   │               │   │       │       │   │       │           │   │   │   ├── ARGS
+│   │               │   │       │       │   │       │           │   │   │   │   └── ARG_LIST
+│   │               │   │       │       │   │       │           │   │   │   │       ├── EXPRESSION
+│   │               │   │       │       │   │       │           │   │   │   │       │   ├── (ID, a)
+│   │               │   │       │       │   │       │           │   │   │   │       │   └── B
+│   │               │   │       │       │   │       │           │   │   │   │       │       └── SIMPLE_EXPRESSION_PRIME
+│   │               │   │       │       │   │       │           │   │   │   │       │           ├── ADDITIVE_EXPRESSION_PRIME
+│   │               │   │       │       │   │       │           │   │   │   │       │           │   ├── TERM_PRIME
+│   │               │   │       │       │   │       │           │   │   │   │       │           │   │   ├── FACTOR_PRIME
+│   │               │   │       │       │   │       │           │   │   │   │       │           │   │   │   └── epsilon
+│   │               │   │       │       │   │       │           │   │   │   │       │           │   │   └── G
+│   │               │   │       │       │   │       │           │   │   │   │       │           │   │       └── epsilon
+│   │               │   │       │       │   │       │           │   │   │   │       │           │   └── D
+│   │               │   │       │       │   │       │           │   │   │   │       │           │       └── epsilon
+│   │               │   │       │       │   │       │           │   │   │   │       │           └── C
+│   │               │   │       │       │   │       │           │   │   │   │       │               └── epsilon
+│   │               │   │       │       │   │       │           │   │   │   │       └── ARG_LIST_PRIME
+│   │               │   │       │       │   │       │           │   │   │   │           └── epsilon
+│   │               │   │       │       │   │       │           │   │   │   └── (SYMBOL, ))
+│   │               │   │       │       │   │       │           │   │   └── G
+│   │               │   │       │       │   │       │           │   │       └── epsilon
+│   │               │   │       │       │   │       │           │   └── D
+│   │               │   │       │       │   │       │           │       └── epsilon
+│   │               │   │       │       │   │       │           └── C
+│   │               │   │       │       │   │       │               └── epsilon
+│   │               │   │       │       │   │       └── (SYMBOL, ;)
+│   │               │   │       │       │   └── STATEMENT_LIST
+│   │               │   │       │       │       ├── STATEMENT
+│   │               │   │       │       │       │   └── RETURN_STMT
+│   │               │   │       │       │       │       ├── (KEYWORD, return)
+│   │               │   │       │       │       │       └── RETURN_STMT_PRIME
+│   │               │   │       │       │       │           ├── EXPRESSION
+│   │               │   │       │       │       │           │   └── SIMPLE_EXPRESSION_ZEGOND
+│   │               │   │       │       │       │           │       ├── ADDITIVE_EXPRESSION_ZEGOND
+│   │               │   │       │       │       │           │       │   ├── TERM_ZEGOND
+│   │               │   │       │       │       │           │       │   │   ├── FACTOR_ZEGOND
+│   │               │   │       │       │       │           │       │   │   │   └── (NUM, 0)
+│   │               │   │       │       │       │           │       │   │   └── G
+│   │               │   │       │       │       │           │       │   │       └── epsilon
+│   │               │   │       │       │       │           │       │   └── D
+│   │               │   │       │       │       │           │       │       ├── ADDOP
+│   │               │   │       │       │       │           │       │       │   └── (SYMBOL, -)
+│   │               │   │       │       │       │           │       │       ├── TERM
+│   │               │   │       │       │       │           │       │       │   ├── FACTOR
+│   │               │   │       │       │       │           │       │       │   │   └── (NUM, 0)
+│   │               │   │       │       │       │           │       │       │   └── G
+│   │               │   │       │       │       │           │       │       │       └── epsilon
+│   │               │   │       │       │       │           │       │       └── D
+│   │               │   │       │       │       │           │       │           └── epsilon
+│   │               │   │       │       │       │           │       └── C
+│   │               │   │       │       │       │           │           └── epsilon
+│   │               │   │       │       │       │           └── (SYMBOL, ;)
+│   │               │   │       │       │       └── STATEMENT_LIST
+│   │               │   │       │       │           └── epsilon
+│   │               │   │       │       └── (SYMBOL, })
+│   │               │   │       └── ELSE_STMT
+│   │               │   │           ├── (KEYWORD, else)
+│   │               │   │           ├── STATEMENT
+│   │               │   │           │   └── COMPOUND_STMT
+│   │               │   │           │       ├── (SYMBOL, {)
+│   │               │   │           │       ├── DECLARATION_LIST
+│   │               │   │           │       │   └── epsilon
+│   │               │   │           │       ├── STATEMENT_LIST
+│   │               │   │           │       │   ├── STATEMENT
+│   │               │   │           │       │   │   └── EXPRESSION_STMT
+│   │               │   │           │       │   │       ├── EXPRESSION
+│   │               │   │           │       │   │       │   ├── (ID, g)
+│   │               │   │           │       │   │       │   └── B
+│   │               │   │           │       │   │       │       └── SIMPLE_EXPRESSION_PRIME
+│   │               │   │           │       │   │       │           ├── ADDITIVE_EXPRESSION_PRIME
+│   │               │   │           │       │   │       │           │   ├── TERM_PRIME
+│   │               │   │           │       │   │       │           │   │   ├── FACTOR_PRIME
+│   │               │   │           │       │   │       │           │   │   │   ├── (SYMBOL, ()
+│   │               │   │           │       │   │       │           │   │   │   ├── ARGS
+│   │               │   │           │       │   │       │           │   │   │   │   └── ARG_LIST
+│   │               │   │           │       │   │       │           │   │   │   │       ├── EXPRESSION
+│   │               │   │           │       │   │       │           │   │   │   │       │   ├── (ID, a)
+│   │               │   │           │       │   │       │           │   │   │   │       │   └── B
+│   │               │   │           │       │   │       │           │   │   │   │       │       └── SIMPLE_EXPRESSION_PRIME
+│   │               │   │           │       │   │       │           │   │   │   │       │           ├── ADDITIVE_EXPRESSION_PRIME
+│   │               │   │           │       │   │       │           │   │   │   │       │           │   ├── TERM_PRIME
+│   │               │   │           │       │   │       │           │   │   │   │       │           │   │   ├── FACTOR_PRIME
+│   │               │   │           │       │   │       │           │   │   │   │       │           │   │   │   └── epsilon
+│   │               │   │           │       │   │       │           │   │   │   │       │           │   │   └── G
+│   │               │   │           │       │   │       │           │   │   │   │       │           │   │       └── epsilon
+│   │               │   │           │       │   │       │           │   │   │   │       │           │   └── D
+│   │               │   │           │       │   │       │           │   │   │   │       │           │       ├── ADDOP
+│   │               │   │           │       │   │       │           │   │   │   │       │           │       │   └── (SYMBOL, -)
+│   │               │   │           │       │   │       │           │   │   │   │       │           │       ├── TERM
+│   │               │   │           │       │   │       │           │   │   │   │       │           │       │   ├── FACTOR
+│   │               │   │           │       │   │       │           │   │   │   │       │           │       │   │   ├── (ID, a)
+│   │               │   │           │       │   │       │           │   │   │   │       │           │       │   │   └── VAR_CALL_PRIME
+│   │               │   │           │       │   │       │           │   │   │   │       │           │       │   │       └── VAR_PRIME
+│   │               │   │           │       │   │       │           │   │   │   │       │           │       │   │           └── epsilon
+│   │               │   │           │       │   │       │           │   │   │   │       │           │       │   └── G
+│   │               │   │           │       │   │       │           │   │   │   │       │           │       │       └── epsilon
+│   │               │   │           │       │   │       │           │   │   │   │       │           │       └── D
+│   │               │   │           │       │   │       │           │   │   │   │       │           │           └── epsilon
+│   │               │   │           │       │   │       │           │   │   │   │       │           └── C
+│   │               │   │           │       │   │       │           │   │   │   │       │               └── epsilon
+│   │               │   │           │       │   │       │           │   │   │   │       └── ARG_LIST_PRIME
+│   │               │   │           │       │   │       │           │   │   │   │           └── epsilon
+│   │               │   │           │       │   │       │           │   │   │   └── (SYMBOL, ))
+│   │               │   │           │       │   │       │           │   │   └── G
+│   │               │   │           │       │   │       │           │   │       └── epsilon
+│   │               │   │           │       │   │       │           │   └── D
+│   │               │   │           │       │   │       │           │       └── epsilon
+│   │               │   │           │       │   │       │           └── C
+│   │               │   │           │       │   │       │               └── epsilon
+│   │               │   │           │       │   │       └── (SYMBOL, ;)
+│   │               │   │           │       │   └── STATEMENT_LIST
+│   │               │   │           │       │       ├── STATEMENT
+│   │               │   │           │       │       │   └── EXPRESSION_STMT
+│   │               │   │           │       │       │       ├── EXPRESSION
+│   │               │   │           │       │       │       │   ├── (ID, t)
+│   │               │   │           │       │       │       │   └── B
+│   │               │   │           │       │       │       │       ├── (SYMBOL, =)
+│   │               │   │           │       │       │       │       └── EXPRESSION
+│   │               │   │           │       │       │       │           └── SIMPLE_EXPRESSION_ZEGOND
+│   │               │   │           │       │       │       │               ├── ADDITIVE_EXPRESSION_ZEGOND
+│   │               │   │           │       │       │       │               │   ├── TERM_ZEGOND
+│   │               │   │           │       │       │       │               │   │   ├── FACTOR_ZEGOND
+│   │               │   │           │       │       │       │               │   │   │   └── (NUM, 0)
+│   │               │   │           │       │       │       │               │   │   └── G
+│   │               │   │           │       │       │       │               │   │       └── epsilon
+│   │               │   │           │       │       │       │               │   └── D
+│   │               │   │           │       │       │       │               │       └── epsilon
+│   │               │   │           │       │       │       │               └── C
+│   │               │   │           │       │       │       │                   └── epsilon
+│   │               │   │           │       │       │       └── (SYMBOL, ;)
+│   │               │   │           │       │       └── STATEMENT_LIST
+│   │               │   │           │       │           └── epsilon
+│   │               │   │           │       └── (SYMBOL, })
+│   │               │   │           └── (KEYWORD, endif)
+│   │               │   └── STATEMENT_LIST
+│   │               │       └── epsilon
+│   │               └── (SYMBOL, })
+│   └── DECLARATION_LIST
+│       ├── DECLARATION
+│       │   ├── DECLARATION_INITIAL
+│       │   │   ├── TYPE_SPECIFIER
+│       │   │   │   └── (KEYWORD, void)
+│       │   │   └── (ID, main)
+│       │   └── DECLARATION_PRIME
+│       │       └── FUN_DECLARATION_PRIME
+│       │           ├── (SYMBOL, ()
+│       │           ├── PARAMS
+│       │           │   └── (KEYWORD, void)
+│       │           ├── (SYMBOL, ))
+│       │           └── COMPOUND_STMT
+│       │               ├── (SYMBOL, {)
+│       │               ├── DECLARATION_LIST
+│       │               │   └── epsilon
+│       │               ├── STATEMENT_LIST
+│       │               │   ├── STATEMENT
+│       │               │   │   └── EXPRESSION_STMT
+│       │               │   │       ├── EXPRESSION
+│       │               │   │       │   ├── (ID, f)
+│       │               │   │       │   └── B
+│       │               │   │       │       └── SIMPLE_EXPRESSION_PRIME
+│       │               │   │       │           ├── ADDITIVE_EXPRESSION_PRIME
+│       │               │   │       │           │   ├── TERM_PRIME
+│       │               │   │       │           │   │   ├── FACTOR_PRIME
+│       │               │   │       │           │   │   │   ├── (SYMBOL, ()
+│       │               │   │       │           │   │   │   ├── ARGS
+│       │               │   │       │           │   │   │   │   └── ARG_LIST
+│       │               │   │       │           │   │   │   │       ├── EXPRESSION
+│       │               │   │       │           │   │   │   │       │   └── SIMPLE_EXPRESSION_ZEGOND
+│       │               │   │       │           │   │   │   │       │       ├── ADDITIVE_EXPRESSION_ZEGOND
+│       │               │   │       │           │   │   │   │       │       │   ├── TERM_ZEGOND
+│       │               │   │       │           │   │   │   │       │       │   │   ├── FACTOR_ZEGOND
+│       │               │   │       │           │   │   │   │       │       │   │   │   └── (NUM, 10)
+│       │               │   │       │           │   │   │   │       │       │   │   └── G
+│       │               │   │       │           │   │   │   │       │       │   │       └── epsilon
+│       │               │   │       │           │   │   │   │       │       │   └── D
+│       │               │   │       │           │   │   │   │       │       │       └── epsilon
+│       │               │   │       │           │   │   │   │       │       └── C
+│       │               │   │       │           │   │   │   │       │           └── epsilon
+│       │               │   │       │           │   │   │   │       └── ARG_LIST_PRIME
+│       │               │   │       │           │   │   │   │           └── epsilon
+│       │               │   │       │           │   │   │   └── (SYMBOL, ))
+│       │               │   │       │           │   │   └── G
+│       │               │   │       │           │   │       └── epsilon
+│       │               │   │       │           │   └── D
+│       │               │   │       │           │       └── epsilon
+│       │               │   │       │           └── C
+│       │               │   │       │               └── epsilon
+│       │               │   │       └── (SYMBOL, ;)
+│       │               │   └── STATEMENT_LIST
+│       │               │       └── epsilon
+│       │               └── (SYMBOL, })
+│       └── DECLARATION_LIST
+│           └── epsilon
+└── $

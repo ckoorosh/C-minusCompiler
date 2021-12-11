@@ -258,9 +258,10 @@ class Parser:
 
     def get_current_lexeme(self):
         token, lexeme = self.current_token
+        parse_lexeme = lexeme
         if token == TokenType.NUM or token == TokenType.ID:
             lexeme = token.name
-        return lexeme
+        return lexeme, parse_lexeme
 
     def get_next_lexeme(self):
         self.get_next_token()
@@ -270,11 +271,12 @@ class Parser:
         for path in Sets.TRANSITIONS[state]:
             edge = list(path.keys())[0]
             next_state = path[edge]
+            lexeme, parse_lexeme = self.get_current_lexeme()
             if next_state != -1:
-                if self.get_current_lexeme() in Sets.FIRST_SETS[edge]:
+                if lexeme in Sets.FIRST_SETS[edge]:
                     return path
             else:
-                if self.get_current_lexeme() == edge:
+                if lexeme == edge:
                     return path
         return self.get_epsilon(state)
 
@@ -303,7 +305,7 @@ class Parser:
         for edge in path:
             next_state = path[edge]
             while True:
-                lexeme = self.get_current_lexeme()
+                lexeme, parse_lexeme = self.get_current_lexeme()
                 if next_state != -1:  # non-terminal
                     if lexeme in Sets.FIRST_SETS[edge]:
                         self.parse(next_state, node)
@@ -334,11 +336,9 @@ class Parser:
                     if lexeme == edge:
                         if edge == '$':
                             terminal_node = Node('$', parent=node)
-                            for pre, fill, n in RenderTree(node):
-                                result = (("%s%s" % (pre, node.name)).encode("utf-8"))
                             return
                         else:
-                            terminal_node = Node(f'({self.current_token[0].name}, {lexeme})', parent=node)
+                            terminal_node = Node(f'({self.current_token[0].name}, {parse_lexeme})', parent=node)
                             self.get_next_token()
                             break
                     else:
