@@ -332,6 +332,8 @@ class Parser:
                         break
                     if lexeme == edge:
                         if edge == '$':
+                            for pre, fill, n in RenderTree(node):
+                                print((pre, n.name))
                             return
                         else:
                             self.get_next_token()
@@ -340,10 +342,6 @@ class Parser:
                         self.add_error(f'missing {edge}')
                         # print(f'missing {edge}')
                         break
-
-        if NonTerminals(state).name == "DECLARATION_LIST":
-            for pre, fill, n in RenderTree(node):
-                print((pre, n.name))
 
     def add_error(self, error):
         self.errors.append((self.scanner.current_line, error))
