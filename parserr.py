@@ -216,7 +216,8 @@ class Sets:
         28: [{NonTerminals.TERM: 33, NonTerminals.D: 31}],
         29: [{NonTerminals.TERM_PRIME: 34, NonTerminals.D: 31}],
         30: [{NonTerminals.TERM_ZEGOND: 35, NonTerminals.D: 31}],
-        31: [{NonTerminals.ADDOP: 32, NonTerminals.TERM: 33, NonTerminals.D: 31}],
+        31: [{NonTerminals.ADDOP: 32, NonTerminals.TERM: 33, NonTerminals.D: 31},
+             {'': -1}],
         32: [{'+': -1},
              {'-': -1}],
         33: [{NonTerminals.FACTOR: 37, NonTerminals.G: 36}],
@@ -276,7 +277,19 @@ class Parser:
             else:
                 if self.get_current_lexeme() == edge:
                     return path
-        return Sets.TRANSITIONS[state][0]
+        return self.get_epsilon(state)
+
+    def get_epsilon(self, state):
+        for path in Sets.TRANSITIONS[state]:
+            edge = list(path.keys())[0]
+            next_state = path[edge]
+            if next_state == -1:
+                if edge == '':
+                    return path
+            else:
+                if '' in Sets.FIRST_SETS[edge]:
+                    return path
+        return None
 
     def parse(self, state, parent = None):
         if NonTerminals(state).name != "PROGRAM":
@@ -284,33 +297,48 @@ class Parser:
         else:
             node = Node(NonTerminals(state).name)
         path = self.get_path(state)
-        print(f'Entering {NonTerminals(state).name} with token "{self.current_token[1]}"')
-        print(f'And choosing path {path}')
+        # print(f'Entering {NonTerminals(state).name} with token "{self.current_token[1]}"')
+        # print(f'And choosing path {path}')
 
         for edge in path:
             next_state = path[edge]
-            lexeme = self.get_current_lexeme()
-            if next_state != -1:  # non-terminal
-                if lexeme in Sets.FIRST_SETS[edge]:
-                    self.parse(next_state, node)
-                    if self.eof_error:
-                        return
-                else:
-                    if '' in Sets.FIRST_SETS[edge]:
-                        continue
+            while True:
+                lexeme = self.get_current_lexeme()
+                if next_state != -1:  # non-terminal
+                    if lexeme in Sets.FIRST_SETS[edge]:
+                        self.parse(next_state)
+                        if self.eof_error:
+                            return
+                        break
+                    elif lexeme in Sets.FOLLOW_SETS[edge]:
+                        if '' in Sets.FIRST_SETS[edge]:
+                            self.parse(next_state)
+                            break
+                        else:
+                            self.add_error(f'missing {edge}')
+                            # print(f'missing {edge}')
+                            break
                     else:
-                        self.add_error(f'missing {edge.name}')
-                        print(f'missing {edge.name}')
-            else:  # terminal
-                if lexeme == edge:
-                    if edge == '$':
-                        return
+                        if lexeme == '$':
+                            self.add_error('Unexpected EOF')
+                            self.eof_error = True
+                            return
+                        else:
+                            self.add_error(f'illegal {lexeme}')
+                            # print(f'illegal {lexeme}')
+                            self.get_next_token()
+                else:  # terminal
+                    if edge == '':
+                        break
+                    if lexeme == edge:
+                        if edge == '$':
+                            return
+                        else:
+                            self.get_next_token()
+                            break
                     else:
                         self.get_next_token()
                         continue
-                else:
-                    self.add_error(f'missing {edge}')
-                    print(f'missing {edge}')
 
         lexeme = self.get_current_lexeme()
         while lexeme not in Sets.FOLLOW_SETS[NonTerminals(state)]:
@@ -349,28 +377,7 @@ class Parser:
         #     return state
 
 
-    def parse2(self, state):
-        for path in Sets.TRANSITIONS[self.state]:
-            flag = 0
-            for node in path.keys():
-                lexeme = self.get_next_lexeme()
-                if (path[node] != -1):
-                    if lexeme in Sets.FIRST_SETS[node]:
-                        self.parse2(path[node])
-                        # add to parse tree??!!
-                    else:
-                        flag = 1
-                        break  # todo
-                else:
-                    if (lexeme != node):
-                        flag = 1
-                        break  # todo
-                    # add to parse tree??!!
-
-            if flag == 0:  # a successful path found
-                # add to parse tree??!!
-                pass
-
+   
     def add_error(self, error):
         self.errors.append((self.scanner.current_line, error))
 
