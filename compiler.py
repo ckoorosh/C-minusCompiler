@@ -1,13 +1,13 @@
 from scanner import *
-from parser import *
+from parserr import *
 
 
 def main(input_path):
     scanner = Scanner(input_path)
-    parser = Parser(scanner)
-    parser.parse()
-    parser.save_parse_tree()
-    parser.save_errors()
+    par = Parser(scanner)
+    par.parse(0)
+    par.save_parse_tree()
+    par.save_errors()
 
 
 if __name__ == '__main__':
