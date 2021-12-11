@@ -329,17 +329,17 @@ class Parser:
                             self.get_next_token()
                 else:  # terminal
                     if edge == '':
-                        terminal_node = Node(lexeme, parent=node)
+                        terminal_node = Node('epsilon', parent=node)
                         break
                     if lexeme == edge:
                         if edge == '$':
-                            terminal_node = Node(lexeme, parent=node)
+                            terminal_node = Node('$', parent=node)
                             for pre, fill, n in RenderTree(node):
                                 print("%s%s" % (pre, node.name))
                             return
                         else:
+                            terminal_node = Node(f'({self.current_token[0].name}, {lexeme})', parent=node)
                             self.get_next_token()
-                            terminal_node = Node(lexeme, parent=node)
                             break
                     else:
                         self.add_error(f'missing {edge}')
