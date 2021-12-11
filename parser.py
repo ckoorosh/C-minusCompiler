@@ -298,6 +298,7 @@ class Parser:
         else:
             return state
 
+
     def parse2(self, state):
         for path in Sets.TRANSITIONS[self.state]:
             flag = 0
