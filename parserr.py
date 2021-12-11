@@ -291,9 +291,9 @@ class Parser:
                     return path
         return None
 
-    def parse(self, state, parent = None):
+    def parse(self, state, parent=None):
         if NonTerminals(state).name != "PROGRAM":
-            node = Node(NonTerminals(state).name, parent) 
+            node = Node(NonTerminals(state).name, parent)
         else:
             node = Node(NonTerminals(state).name)
         path = self.get_path(state)
@@ -337,47 +337,14 @@ class Parser:
                             self.get_next_token()
                             break
                     else:
-                        self.get_next_token()
-                        continue
+                        self.add_error(f'missing {edge}')
+                        # print(f'missing {edge}')
+                        break
 
-        lexeme = self.get_current_lexeme()
-        while lexeme not in Sets.FOLLOW_SETS[NonTerminals(state)]:
-            if lexeme == '$':
-                self.add_error('Unexpected EOF')
-                self.eof_error = True
-                break
-            else:
-                self.add_error(f'illegal {lexeme}')
-            print(f'illegal {lexeme}')
-            lexeme = self.get_next_lexeme()
-
-        print(f'returning from {NonTerminals(state)} with token {lexeme} ...')
         if NonTerminals(state).name == "DECLARATION_LIST":
             for pre, fill, n in RenderTree(node):
                 print((pre, n.name))
 
-        #     if non_terminal in Sets.FIRST_SETS:  # e is non-terminal
-        #         if lexeme in Sets.FIRST_SETS[e]:
-        #             self.state = self.parse(self.state, e)
-        #         else:
-        #             if e not in Sets.FOLLOW_SETS[non_terminal]:
-        #                 self.add_error(f'illegal {lexeme}')
-        #                 self.state = self.parse(s, non_terminal)
-        #             else:
-        #                 # should be replaced by a token that can be derived from e
-        #                 self.add_error(f'missing {e}')
-        #                 return state
-        #     else:
-        #         if e == lexeme:
-        #             self.state = s
-        #         else:
-        #             self.add_error(f'missing {e}')
-        #             return state
-        # else:
-        #     return state
-
-
-   
     def add_error(self, error):
         self.errors.append((self.scanner.current_line, error))
 
@@ -398,6 +365,7 @@ class Parser:
             errors = 'There is no syntax error.'
         with open('syntax_errors.txt', 'w') as file:
             file.write(errors)
+
 
 scanner = Scanner("input.txt")
 parser = Parser(scanner)
