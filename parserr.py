@@ -332,6 +332,8 @@ class Parser:
                         break
                     if lexeme == edge:
                         if edge == '$':
+                            for pre, fill, n in RenderTree(node):
+                                print((pre, n.name))
                             return
                         else:
                             self.get_next_token()
@@ -352,9 +354,7 @@ class Parser:
             lexeme = self.get_next_lexeme()
 
         print(f'returning from {NonTerminals(state)} with token {lexeme} ...')
-        if NonTerminals(state).name == "DECLARATION_LIST":
-            for pre, fill, n in RenderTree(node):
-                print((pre, n.name))
+            
 
         #     if non_terminal in Sets.FIRST_SETS:  # e is non-terminal
         #         if lexeme in Sets.FIRST_SETS[e]:
