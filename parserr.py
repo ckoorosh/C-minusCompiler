@@ -1,5 +1,4 @@
 import enum
-from os import path
 from anytree import Node, RenderTree
 from scanner import Scanner, TokenType
 
@@ -296,6 +295,7 @@ class Parser:
             node = Node(NonTerminals(state).name, parent=parent)
         else:
             node = Node(NonTerminals(state).name)
+            self.parse_tree = node
         path = self.get_path(state)
         # print(f'Entering {NonTerminals(state).name} with token "{self.current_token[1]}"')
         # print(f'And choosing path {path}')
@@ -363,8 +363,3 @@ class Parser:
             errors = 'There is no syntax error.'
         with open('syntax_errors.txt', 'w') as file:
             file.write(errors)
-
-
-scanner = Scanner("input.txt")
-parser = Parser(scanner)
-parser.parse(0)
