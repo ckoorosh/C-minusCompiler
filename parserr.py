@@ -292,11 +292,14 @@ class Parser:
                     return path
         return None
 
+    def get_non_terminal_name(self, non_terminal):
+        return str.capitalize(str.lower(non_terminal)).replace('_', '-')
+
     def parse(self, state, parent=None):
         if NonTerminals(state).name != "PROGRAM":
-            node = Node(NonTerminals(state).name, parent=parent)
+            node = Node(self.get_non_terminal_name(NonTerminals(state).name), parent=parent)
         else:
-            node = Node(NonTerminals(state).name)
+            node = Node(self.get_non_terminal_name(NonTerminals(state).name))
             self.parse_tree = node
         path = self.get_path(state)
         # print(f'Entering {NonTerminals(state).name} with token "{self.current_token[1]}"')
