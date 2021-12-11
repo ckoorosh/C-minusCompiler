@@ -1,6 +1,3 @@
-# Mohammadreza Mofayezi 98106059
-# Pouria Momtaz 98106061
-
 # With some help from CS143 stanford course
 
 import enum

@@ -1,3 +1,6 @@
+# Mohammadreza Mofayezi 98106059
+# Pouria Momtaz 98106061
+
 from scanner import *
 from parserr import *
 

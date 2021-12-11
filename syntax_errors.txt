@@ -1,1 +1,1 @@
-#7 : syntax error, missing NonTerminals.ADDITIVE_EXPRESSION
+#7 : syntax error, missing Additive-expression

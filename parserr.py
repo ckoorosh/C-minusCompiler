@@ -1,6 +1,6 @@
 import enum
 from anytree import Node, RenderTree
-from scanner import Scanner, TokenType
+from scanner import TokenType
 
 
 class NonTerminals(enum.Enum):
@@ -302,8 +302,6 @@ class Parser:
             node = Node(self.get_non_terminal_name(NonTerminals(state).name))
             self.parse_tree = node
         path = self.get_path(state)
-        # print(f'Entering {NonTerminals(state).name} with token "{self.current_token[1]}"')
-        # print(f'And choosing path {path}')
 
         for edge in path:
             next_state = path[edge]
@@ -320,8 +318,7 @@ class Parser:
                             self.parse(next_state, node)
                             break
                         else:
-                            self.add_error(f'missing {edge}')
-                            # print(f'missing {edge}')
+                            self.add_error(f'missing {self.get_non_terminal_name(edge.name)}')
                             break
                     else:
                         if lexeme == '$':
@@ -330,7 +327,6 @@ class Parser:
                             return
                         else:
                             self.add_error(f'illegal {lexeme}')
-                            # print(f'illegal {lexeme}')
                             self.get_next_token()
                 else:  # terminal
                     if edge == '':
@@ -346,19 +342,22 @@ class Parser:
                             break
                     else:
                         self.add_error(f'missing {edge}')
-                        # print(f'missing {edge}')
                         break
 
     def add_error(self, error):
         self.errors.append((self.scanner.current_line, error))
 
     def save_parse_tree(self):
-        with open('parses_tree.txt', 'w', encoding="utf-8") as file:
+        line = 0
+        for _, _, _ in RenderTree(self.parse_tree):
+            line += 1
+        with open('parse_tree.txt', 'w', encoding="utf-8") as file:
             for pre, _, node in RenderTree(self.parse_tree):
-                if hasattr(node, 'token'):
-                    file.write(f'{pre}{node.token}\n')
+                if line == 1:
+                    file.write(f'{pre}{node.name}')
                 else:
                     file.write(f'{pre}{node.name}\n')
+                line -= 1
 
     def save_errors(self):
         errors = ''
