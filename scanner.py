@@ -67,12 +67,12 @@ class Scanner:
         self.init_symbol_table()
 
     def read_text(self):
-        with open(self.input_file, "rb") as f:
+        with open(self.input_file, "r", encoding="utf-8") as f:
             f.seek(self.file_pointer)
             chunk = f.read(self.chunk_size)
         if not chunk:
             raise EOFError
-        self.text += chunk.decode()
+        self.text += chunk
         self.file_pointer += self.chunk_size
 
     def init_symbol_table(self):
@@ -104,14 +104,14 @@ class Scanner:
                 (token_type, lexeme) = token
                 tokens += '(' + str(token_type) + ', ' + lexeme + ') '
             tokens += '\n'
-        with open('tokens.txt', 'w') as file:
+        with open('tokens.txt', 'w', encoding="utf-8") as file:
             file.write(tokens)
 
     def save_symbol_table(self):
         symbol_table = ''
         for line_number, symbol in enumerate(self.symbol_table):
             symbol_table += str(line_number + 1) + '.' + '	' + symbol + '\n'
-        with open('symbol_table.txt', 'w') as file:
+        with open('symbol_table.txt', 'w', encoding="utf-8") as file:
             file.write(symbol_table)
 
     def save_errors(self):
@@ -125,7 +125,7 @@ class Scanner:
                 errors += '\n'
         else:
             errors = 'There is no lexical error.'
-        with open('lexical_errors.txt', 'w') as file:
+        with open('lexical_errors.txt', 'w', encoding="utf-8") as file:
             file.write(errors)
 
     def add_error(self, error):

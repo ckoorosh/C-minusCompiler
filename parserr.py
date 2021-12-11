@@ -1,6 +1,7 @@
 import enum
+from os import path
 from anytree import Node, RenderTree
-from scanner import TokenType
+from scanner import Scanner, TokenType
 
 
 class NonTerminals(enum.Enum):
@@ -277,7 +278,11 @@ class Parser:
                     return path
         return Sets.TRANSITIONS[state][0]
 
-    def parse(self, state):
+    def parse(self, state, parent = None):
+        if NonTerminals(state).name != "PROGRAM":
+            node = Node(NonTerminals(state).name, parent) 
+        else:
+            node = Node(NonTerminals(state).name)
         path = self.get_path(state)
         print(f'Entering {NonTerminals(state).name} with token "{self.current_token[1]}"')
         print(f'And choosing path {path}')
@@ -287,7 +292,7 @@ class Parser:
             lexeme = self.get_current_lexeme()
             if next_state != -1:  # non-terminal
                 if lexeme in Sets.FIRST_SETS[edge]:
-                    self.parse(next_state)
+                    self.parse(next_state, node)
                     if self.eof_error:
                         return
                 else:
@@ -319,6 +324,9 @@ class Parser:
             lexeme = self.get_next_lexeme()
 
         print(f'returning from {NonTerminals(state)} with token {lexeme} ...')
+        if NonTerminals(state).name != "PROGRAM":
+            for pre, fill, n in RenderTree(node):
+                print((n.name))
 
         #     if non_terminal in Sets.FIRST_SETS:  # e is non-terminal
         #         if lexeme in Sets.FIRST_SETS[e]:
@@ -383,3 +391,7 @@ class Parser:
             errors = 'There is no syntax error.'
         with open('syntax_errors.txt', 'w') as file:
             file.write(errors)
+
+scanner = Scanner("input.txt")
+parser = Parser(scanner)
+parser.parse(0)
