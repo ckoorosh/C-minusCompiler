@@ -335,7 +335,7 @@ class Parser:
                         if edge == '$':
                             terminal_node = Node(lexeme, parent=node)
                             for pre, fill, n in RenderTree(node):
-                                print("%s%s" % (pre, node.name))
+                                result = (("%s%s" % (pre, node.name)).encode("utf-8"))
                             return
                         else:
                             self.get_next_token()
