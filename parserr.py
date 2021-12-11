@@ -1,4 +1,5 @@
 import enum
+from typing import Counter
 from anytree import Node, RenderTree
 from scanner import Scanner, TokenType
 
@@ -354,11 +355,16 @@ class Parser:
 
     def save_parse_tree(self):
         with open('parses_tree.txt', 'w', encoding="utf-8") as file:
+            flag = 0
             for pre, _, node in RenderTree(self.parse_tree):
+                if flag == 1:
+                    file.write('\n')
+                flag = 1
                 if hasattr(node, 'token'):
-                    file.write(f'{pre}{node.token}\n')
+                    file.write(f'{pre}{node.token}')
                 else:
-                    file.write(f'{pre}{node.name}\n')
+                    file.write(f'{pre}{node.name}')
+            
 
     def save_errors(self):
         errors = ''
