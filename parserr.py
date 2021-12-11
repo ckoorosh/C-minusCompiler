@@ -312,7 +312,7 @@ class Parser:
                         break
                     elif lexeme in Sets.FOLLOW_SETS[edge]:
                         if '' in Sets.FIRST_SETS[edge]:
-                            self.parse(next_state)
+                            self.parse(next_state, node)
                             break
                         else:
                             self.add_error(f'missing {edge}')
@@ -352,9 +352,9 @@ class Parser:
             lexeme = self.get_next_lexeme()
 
         print(f'returning from {NonTerminals(state)} with token {lexeme} ...')
-        if NonTerminals(state).name != "PROGRAM":
+        if NonTerminals(state).name == "DECLARATION_LIST":
             for pre, fill, n in RenderTree(node):
-                print((n.name))
+                print((pre, n.name))
 
         #     if non_terminal in Sets.FIRST_SETS:  # e is non-terminal
         #         if lexeme in Sets.FIRST_SETS[e]:
