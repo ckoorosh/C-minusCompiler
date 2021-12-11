@@ -293,7 +293,7 @@ class Parser:
 
     def parse(self, state, parent=None):
         if NonTerminals(state).name != "PROGRAM":
-            node = Node(NonTerminals(state).name, parent)
+            node = Node(NonTerminals(state).name, parent=parent)
         else:
             node = Node(NonTerminals(state).name)
         path = self.get_path(state)
@@ -306,7 +306,7 @@ class Parser:
                 lexeme = self.get_current_lexeme()
                 if next_state != -1:  # non-terminal
                     if lexeme in Sets.FIRST_SETS[edge]:
-                        self.parse(next_state)
+                        self.parse(next_state, node)
                         if self.eof_error:
                             return
                         break
