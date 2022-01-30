@@ -315,13 +315,13 @@ class Parser:
                 lexeme, parse_lexeme = self.get_current_lexeme()
                 if next_state != -1:  # non-terminal
                     if lexeme in Sets.FIRST_SETS[edge]:
-                        self.parse(next_state, node)
+                        self._parse(next_state, node)
                         if self.eof_error:
                             return
                         break
                     elif lexeme in Sets.FOLLOW_SETS[edge]:
                         if '' in Sets.FIRST_SETS[edge]:
-                            self.parse(next_state, node)
+                            self._parse(next_state, node)
                             break
                         else:
                             self.add_error(f'missing {self.get_non_terminal_name(edge.name)}')
