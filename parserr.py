@@ -1,6 +1,7 @@
 import enum
 from anytree import Node, RenderTree
 from scanner import TokenType
+from code_generator import *
 
 
 class NonTerminals(enum.Enum):
@@ -246,6 +247,7 @@ class Sets:
 class Parser:
     def __init__(self, scanner):
         self.scanner = scanner
+        self.code_generator = CodeGenerator()
         self.errors = []
         self.parse_tree = Node('Program')
         self.state = 0
@@ -295,7 +297,11 @@ class Parser:
     def get_non_terminal_name(self, non_terminal):
         return str.capitalize(str.lower(non_terminal)).replace('_', '-')
 
-    def parse(self, state, parent=None):
+    def parse(self):
+        self._parse(0)
+        self.code_generator.save_output()
+
+    def _parse(self, state, parent=None):
         if NonTerminals(state).name != "PROGRAM":
             node = Node(self.get_non_terminal_name(NonTerminals(state).name), parent=parent)
         else:
@@ -343,6 +349,9 @@ class Parser:
                     else:
                         self.add_error(f'missing {edge}')
                         break
+
+    def code_gen(self):
+        pass
 
     def add_error(self, error):
         self.errors.append((self.scanner.current_line, error))

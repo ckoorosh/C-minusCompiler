@@ -7,10 +7,8 @@ from parserr import *
 
 def main(input_path):
     scanner = Scanner(input_path)
-    par = Parser(scanner)
-    par.parse(0)
-    par.save_parse_tree()
-    par.save_errors()
+    parser = Parser(scanner)
+    parser.parse()
 
 
 if __name__ == '__main__':
