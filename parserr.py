@@ -272,8 +272,12 @@ class Parser:
     def get_path(self, state):
         for path in Sets.TRANSITIONS[state]:
             edge = list(path.keys())[0]
+            for e in path.keys():
+                if not e.startswith('#'):
+                    edge = e
+                    break
             next_state = path[edge]
-            lexeme, parse_lexeme = self.get_current_lexeme()
+            lexeme, _ = self.get_current_lexeme()
             if next_state != -1:
                 if lexeme in Sets.FIRST_SETS[edge]:
                     return path
@@ -313,7 +317,12 @@ class Parser:
             next_state = path[edge]
             while True:
                 lexeme, parse_lexeme = self.get_current_lexeme()
-                if next_state != -1:  # non-terminal
+                if edge.startswith('#S'):  # Semantic Analyzer
+                    pass
+                elif edge.startswith('#IC'):  # Intermediate Code Generator
+                    self.code_gen(edge, lexeme)
+                    break
+                elif next_state != -1:  # non-terminal
                     if lexeme in Sets.FIRST_SETS[edge]:
                         self._parse(next_state, node)
                         if self.eof_error:
@@ -350,7 +359,8 @@ class Parser:
                         self.add_error(f'missing {edge}')
                         break
 
-    def code_gen(self):
+    def code_gen(self, symbol, token):
+        # TODO: Call semantic action routines
         pass
 
     def add_error(self, error):
