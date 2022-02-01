@@ -86,7 +86,6 @@ class CodeGenerator:
             result = self.get_temp()
             operand1 = self.semantic_stack.pop()
             operand2 = self.semantic_stack.pop()
-            op = self.semantic_stack.pop()
             self.add_code(("*", operand1, operand2, result))
             self.semantic_stack.append(result)
         except IndexError:
@@ -96,6 +95,13 @@ class CodeGenerator:
     def save_op_routine(self, input_token):
         try:
             self.semantic_stack.append(input_token)
+        except IndexError:
+            pass
+
+    def save_routine(self, input_token):
+        try:
+            save_addr = self.program_block_index
+            self.semantic_stack.append(save_addr)
         except IndexError:
             pass
 
