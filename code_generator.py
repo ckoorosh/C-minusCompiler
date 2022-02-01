@@ -77,3 +77,10 @@ class CodeGenerator:
         except IndexError:
             pass
 
+    
+    def save_op_routine(self, input_token):
+        try:
+            self.semantic_stack.append(input_token)
+        except IndexError:
+            pass
+
