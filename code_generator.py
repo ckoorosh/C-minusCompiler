@@ -102,6 +102,14 @@ class CodeGenerator:
         try:
             save_addr = self.program_block_index
             self.semantic_stack.append(save_addr)
+            self.add_placeholder()
+        except IndexError:
+            pass
+
+    def label_routine(self, input_token):
+        try:
+            save_addr = self.program_block_index
+            self.semantic_stack.append(save_addr)
         except IndexError:
             pass
 
