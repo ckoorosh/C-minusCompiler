@@ -63,3 +63,17 @@ class CodeGenerator:
 
         with open('output.txt', 'w') as file:
             file.write(codes)
+
+
+
+    def add_op_routine(self, input_token):
+        try:
+            result = self.get_temp()
+            operand1 = self.semantic_stack.pop()
+            operand2 = self.semantic_stack.pop()
+            op = self.semantic_stack.pop()
+            self.add_code((op, operand1, operand2, result))
+            self.semantic_stack.append(result)
+        except IndexError:
+            pass
+

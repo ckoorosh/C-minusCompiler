@@ -191,7 +191,7 @@ class Sets:
              {NonTerminals.ITERATION_STMT: 18},
              {NonTerminals.RETURN_STMT: 19}],
         15: [{NonTerminals.EXPRESSION: 21, '#close_stmt': -1, ';': -1},
-             {'#break_save': -1, 'break': -1, ';': -1},
+             {'#': -1, 'break': -1, ';': -1},
              {';': -1}],
         16: [{'if': -1, '(': -1, NonTerminals.EXPRESSION: 21, ')': -1, '#save': -1, NonTerminals.STATEMENT: 14,
               NonTerminals.ELSE_STMT: 17}],
