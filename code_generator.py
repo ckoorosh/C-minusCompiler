@@ -144,3 +144,20 @@ class CodeGenerator:
             self.semantic_stack.append(address)
         except IndexError:
             pass
+
+    def if_else_routine(self, input_token):
+        try:
+            jump_addr = self.semantic_stack.pop()
+            self.add_code(("jp", self.program_block_index), jump_addr, True, False)
+        except IndexError:
+            pass
+
+    def else_routine(self, input_token):
+        try:
+            jump_addr = self.semantic_stack.pop()
+            condition = self.semantic_stack.pop()
+            self.add_placeholder()
+            self.add_code(("jpf", condition, self.program_block_index), jump_addr, True, False)
+            self.semantic_stack.append(self.program_block_index)
+        except IndexError:
+            pass
