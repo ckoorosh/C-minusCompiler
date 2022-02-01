@@ -108,3 +108,21 @@ class CodeGenerator:
         except IndexError:
             pass
     
+
+    def push_id_routine(self, input_token):
+        try:
+            id_address = "" #TODO: find address of input using symbol table
+            self.semantic_stack.append(id_address)
+        except IndexError:
+            pass
+
+    
+    def push_const_routine(self, input_token):
+        try:
+            constant_value = "#" + input_token
+            address = self.get_static()
+            self.add_code(self.get_code("assign", constant_value, address))
+            #TODO: find address of input using symbol table
+            self.semantic_stack.append(address)
+        except IndexError:
+            pass
