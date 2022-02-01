@@ -106,6 +106,10 @@ class CodeGenerator:
         except IndexError:
             pass
 
+    def breaksave_routine(self, input_token):
+        self.stack[-1].append(self.program_block_index)
+        self.add_placeholder()
+
     def label_routine(self, input_token):
         try:
             save_addr = self.program_block_index
@@ -169,3 +173,34 @@ class CodeGenerator:
             self.semantic_stack.append(self.program_block_index)
         except IndexError:
             pass
+
+    def close_stmt_routine(self, input_token):
+        if self.semantic_stack:
+            self.semantic_stack.pop() 
+
+
+    def ret_val_routine(self, input_token):
+        result = self.get_temp()
+        self.add_code(self.get_code("SUB", self.static_base_pointer, "#8", result))
+        try:
+            retval_addr = self.semantic_stack.pop()
+        except IndexError:
+            code = self.get_code("assign", "#0", f"@{result}")
+            self.add_code(code)
+        else:
+            code = self.get_code("assign", retval_addr, f"@{result}")
+            self.add_code(code)
+
+
+    def cf_size_routine(self, input_token):
+        #TODO: need some info
+        pass
+
+
+    def until_routine(self, input_token):
+        condition = self.semantic_stack.pop() 
+        jp_addr = self.semantic_stack.pop() 
+        self.add_placeholder
+        self.add_code(("jpf", condition, self.program_block_index), jp_addr, True, False)
+        self.semantic_stack.append(self.program_block_index)
+        pass
