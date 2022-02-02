@@ -410,9 +410,9 @@ class Parser:
 
     def semantic(self, action):
         if action == '#S_in_scope':
-            pass
+            self.semantic_analyzer.in_scope()
         elif action == '#S_out_scope':
-            pass
+            self.semantic_analyzer.out_scope()
 
     def add_error(self, error):
         self.errors.append((self.scanner.current_line, error))
