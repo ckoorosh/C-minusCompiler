@@ -365,6 +365,7 @@ class Parser:
 
     def code_gen(self, symbol, token):
         # TODO: Call semantic action routines
+        print(symbol)
         if symbol == 'init':
             self.code_generator.init_program()
         elif symbol == 'finish':
@@ -397,6 +398,10 @@ class Parser:
             self.code_generator.close()
         elif symbol == '#return_value':
             self.code_generator.return_value()
+        elif symbol == '#return_seq':
+            self.code_generator.return_seq()
+        elif symbol == '#call_seq':
+            self.code_generator.call_seq()
         elif symbol == '#sf_size':
             self.code_generator.sf_size()
 
