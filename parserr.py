@@ -190,7 +190,7 @@ class Sets:
              {NonTerminals.SELECTION_STMT: 16},
              {NonTerminals.ITERATION_STMT: 18},
              {NonTerminals.RETURN_STMT: 19}],
-        15: [{NonTerminals.EXPRESSION: 21, '#close_stmt': -1, ';': -1},
+        15: [{NonTerminals.EXPRESSION: 21, '#close': -1, ';': -1},
              {'#': -1, 'break': -1, ';': -1},
              {';': -1}],
         16: [{'if': -1, '(': -1, NonTerminals.EXPRESSION: 21, ')': -1, '#save': -1, NonTerminals.STATEMENT: 14,
@@ -199,7 +199,7 @@ class Sets:
              {'else': -1, '#else': -1, NonTerminals.STATEMENT: 14, '#if_else': -1, 'endif': -1}],
         18: [{'repeat': -1, NonTerminals.STATEMENT: 14, '#label': -1, 'until': -1, '(': -1, NonTerminals.EXPRESSION: 21,
               '#until': -1, ')': -1}],
-        19: [{'return': -1, NonTerminals.RETURN_STMT_PRIME: 20, '#ret_val': -1, '#return_seq': -1}],
+        19: [{'return': -1, NonTerminals.RETURN_STMT_PRIME: 20, '#return_value': -1, '#return_seq': -1}],
         20: [{';': -1},
              {NonTerminals.EXPRESSION: 21, ';': -1}],
         21: [{NonTerminals.SIMPLE_EXPRESSION_ZEGOND: 24},
@@ -275,7 +275,7 @@ class Parser:
         for path in Sets.TRANSITIONS[state]:
             edge = list(path.keys())[0]
             for e in path.keys():
-                if not e.startswith('#'):
+                if (path[e] == -1 and not e.startswith('#')) or path[e] != -1:
                     edge = e
                     break
             next_state = path[edge]
@@ -304,8 +304,10 @@ class Parser:
         return str.capitalize(str.lower(non_terminal)).replace('_', '-')
 
     def parse(self):
+        # self.code_gen('init', None)
         self._parse(0)
         self.code_generator.save_output()
+        # self.code_gen('finish', None)
 
     def _parse(self, state, parent=None):
         if NonTerminals(state).name != "PROGRAM":
@@ -319,12 +321,7 @@ class Parser:
             next_state = path[edge]
             while True:
                 lexeme, parse_lexeme = self.get_current_lexeme()
-                if edge.startswith('#S_'):  # Semantic Analyzer
-                    pass
-                elif edge.startswith('#'):  # Intermediate Code Generator
-                    self.code_gen(edge, lexeme)
-                    break
-                elif next_state != -1:  # non-terminal
+                if next_state != -1:  # non-terminal
                     if lexeme in Sets.FIRST_SETS[edge]:
                         self._parse(next_state, node)
                         if self.eof_error:
@@ -345,6 +342,11 @@ class Parser:
                         else:
                             self.add_error(f'illegal {lexeme}')
                             self.get_next_token()
+                elif edge.startswith('#S_'):  # Semantic Analyzer
+                    pass
+                elif edge.startswith('#'):  # Intermediate Code Generator
+                    self.code_gen(edge, lexeme)
+                    break
                 else:  # terminal
                     if edge == '':
                         terminal_node = Node('epsilon', parent=node)
@@ -366,9 +368,37 @@ class Parser:
         if symbol == 'init':
             self.code_generator.init_program()
         elif symbol == 'finish':
-            pass
+            self.code_generator.finish_program()
+        elif symbol == '#add_op':
+            self.code_generator.add_op()
+        elif symbol == '#mult':
+            self.code_generator.mult()
+        elif symbol == '#save_op':
+            self.code_generator.save_op(token)
+        elif symbol == '#save':
+            self.code_generator.save()
+        elif symbol == '#break_save':
+            self.code_generator.break_save()
+        elif symbol == '#label':
+            self.code_generator.label()
+        elif symbol == '#relop':
+            self.code_generator.relop()
+        elif symbol == '#assign':
+            self.code_generator.assign()
+        elif symbol == '#push_id':
+            self.code_generator.push_id()
+        elif symbol == '#push_const':
+            self.code_generator.push_const(token)
+        elif symbol == '#if_else':
+            self.code_generator.if_else()
+        elif symbol == '#else':
+            self.code_generator.else_()
+        elif symbol == '#close':
+            self.code_generator.close()
+        elif symbol == '#return_value':
+            self.code_generator.return_value()
         elif symbol == '#sf_size':
-            pass
+            self.code_generator.sf_size()
 
     def add_error(self, error):
         self.errors.append((self.scanner.current_line, error))

@@ -1,6 +1,7 @@
 class CodeGenerator:
     def __init__(self):
         self.semantic_stack = []
+        self.break_stack = []
         self.program_block = []
         self.program_block_index = 0
         self.static_base_pointer = 100
@@ -53,6 +54,12 @@ class CodeGenerator:
         for _ in range(3):
             self.add_placeholder()
 
+    def finish_program(self):
+        return_address = self.get_temp()
+        self.program_block[1] = (1, self.get_code("SUB", self.static_base_pointer, "#4", return_address))
+        self.program_block[2] = (2, self.get_code("assign", f"#{self.program_block_index}", f"@{return_address}"))
+        # self.program_block[3] = (3, self.get_code("jp", SymbolTableManager.findrow("main")["address"]))
+
     def save_output(self):
         codes = ''
         if self.program_block:
@@ -64,12 +71,9 @@ class CodeGenerator:
         with open('output.txt', 'w') as file:
             file.write(codes)
 
+    # routines
 
-
-
-#routines
-
-    def add_op_routine(self, input_token):
+    def add_op(self):
         try:
             result = self.get_temp()
             operand1 = self.semantic_stack.pop()
@@ -80,8 +84,7 @@ class CodeGenerator:
         except IndexError:
             pass
 
-    
-    def mult_routine(self, input_token):
+    def mult(self):
         try:
             result = self.get_temp()
             operand1 = self.semantic_stack.pop()
@@ -91,34 +94,38 @@ class CodeGenerator:
         except IndexError:
             pass
 
-    
-    def save_op_routine(self, input_token):
-        try:
-            self.semantic_stack.append(input_token)
-        except IndexError:
-            pass
+    def save_op(self, input_token):
+        operand = ''
+        if input_token == '+':
+            operand = 'ADD'
+        elif input_token == '-':
+            operand = 'SUB'
+        elif input_token == '==':
+            operand = 'EQ'
+        elif input_token == '<':
+            operand = 'LT'
+        self.semantic_stack.append(operand)
 
-    def save_routine(self, input_token):
+    def save(self):
         try:
-            save_addr = self.program_block_index
-            self.semantic_stack.append(save_addr)
+            save_address = self.program_block_index
+            self.semantic_stack.append(save_address)
             self.add_placeholder()
         except IndexError:
             pass
 
-    def breaksave_routine(self, input_token):
-        self.stack[-1].append(self.program_block_index)
+    def break_save(self):
+        self.break_stack[-1].append(self.program_block_index)
         self.add_placeholder()
 
-    def label_routine(self, input_token):
+    def label(self):
         try:
-            save_addr = self.program_block_index
-            self.semantic_stack.append(save_addr)
+            save_address = self.program_block_index
+            self.semantic_stack.append(save_address)
         except IndexError:
             pass
 
-
-    def relop_routine(self, input_token):
+    def relop(self):
         try:
             result = self.get_temp()
             operand1 = self.semantic_stack.pop()
@@ -129,78 +136,72 @@ class CodeGenerator:
         except IndexError:
             pass
 
-
-    def assign_routine(self, input_token):
+    def assign(self):
         try:
             operand = self.semantic_stack.pop()
             result = self.semantic_stack.pop()
-            self.add_code(("=", operand, result, ))
+            self.add_code(("=", operand, result,))
         except IndexError:
             pass
-    
 
-    def push_id_routine(self, input_token):
+    def push_id(self):
         try:
-            id_address = "" #TODO: find address of input using symbol table
+            id_address = ""  # TODO: find address of input using symbol table
             self.semantic_stack.append(id_address)
         except IndexError:
             pass
 
-    
-    def push_const_routine(self, input_token):
+    def push_const(self, input_token):
         try:
             constant_value = "#" + input_token
             address = self.get_static()
             self.add_code(self.get_code("assign", constant_value, address))
-            #TODO: find address of input using symbol table
+            # TODO: find address of input using symbol table
             self.semantic_stack.append(address)
         except IndexError:
             pass
 
-    def if_else_routine(self, input_token):
+    def if_else(self):
         try:
-            jump_addr = self.semantic_stack.pop()
-            self.add_code(("jp", self.program_block_index), jump_addr, True, False)
+            jump_address = self.semantic_stack.pop()
+            self.add_code(("jp", self.program_block_index), jump_address, True, False)
         except IndexError:
             pass
 
-    def else_routine(self, input_token):
+    def else_(self):
         try:
-            jump_addr = self.semantic_stack.pop()
+            jump_address = self.semantic_stack.pop()
             condition = self.semantic_stack.pop()
             self.add_placeholder()
-            self.add_code(("jpf", condition, self.program_block_index), jump_addr, True, False)
+            self.add_code(("jpf", condition, self.program_block_index), jump_address, True, False)
             self.semantic_stack.append(self.program_block_index)
         except IndexError:
             pass
 
-    def close_stmt_routine(self, input_token):
+    def close(self):
         if self.semantic_stack:
-            self.semantic_stack.pop() 
+            self.semantic_stack.pop()
 
-
-    def ret_val_routine(self, input_token):
+    def return_value(self):
         result = self.get_temp()
         self.add_code(self.get_code("SUB", self.static_base_pointer, "#8", result))
         try:
-            retval_addr = self.semantic_stack.pop()
+            ret_val_address = self.semantic_stack.pop()
         except IndexError:
             code = self.get_code("assign", "#0", f"@{result}")
             self.add_code(code)
         else:
-            code = self.get_code("assign", retval_addr, f"@{result}")
+            code = self.get_code("assign", ret_val_address, f"@{result}")
             self.add_code(code)
 
-
-    def cf_size_routine(self, input_token):
-        #TODO: need some info
+    def sf_size(self):
+        # TODO: need some info
         pass
 
-
-    def until_routine(self, input_token):
-        condition = self.semantic_stack.pop() 
-        jp_addr = self.semantic_stack.pop() 
-        self.add_placeholder
-        self.add_code(("jpf", condition, self.program_block_index), jp_addr, True, False)
+    def until(self):
+        condition = self.semantic_stack.pop()
+        jp_address = self.semantic_stack.pop()
+        self.add_placeholder()
+        self.add_code(("jpf", condition, self.program_block_index), jp_address, True, False)
         self.semantic_stack.append(self.program_block_index)
         pass
