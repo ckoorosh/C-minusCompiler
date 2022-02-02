@@ -4,13 +4,14 @@ class CodeGenerator:
         self.semantic_stack = []
         self.break_stack = []
         self.program_block = []
+        self.scope_stack = [0]
+        self.stack = [0]
         self.program_block_index = 0
         self.static_base_pointer = 100
         self.base_pointer = 500
         self.stack_base_pointer = 1000
         self.static_offset = 0
         self.offset = 0
-        self.stack = [0]
 
     def get_temp(self):
         temp = self.base_pointer + self.offset
@@ -157,7 +158,7 @@ class CodeGenerator:
         try:
             constant_value = "#" + input_token
             address = self.get_static()
-            self.add_code(self.get_code("assign", constant_value, address))
+            self.add_code(self.get_code("ASSIGN", constant_value, address))
             # TODO: find address of input using symbol table
             self.semantic_stack.append(address)
         except IndexError:

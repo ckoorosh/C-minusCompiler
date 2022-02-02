@@ -2,6 +2,7 @@ import enum
 from anytree import Node, RenderTree
 from scanner import TokenType
 from code_generator import *
+from semantic_analyzer import *
 
 
 class NonTerminals(enum.Enum):
@@ -171,8 +172,8 @@ class Sets:
             {NonTerminals.FUN_DECLARATION_PRIME: 6}],
         5: [{';': -1},
             {'[': -1, 'NUM': -1, ']': -1, ';': -1}],
-        6: [{'(': -1, NonTerminals.PARAMS: 8, ')': -1, NonTerminals.COMPOUND_STMT: 12, '#sf_size': -1,
-             '#return_seq': -1}],
+        6: [{'(': -1, '#S_in_scope': -1, NonTerminals.PARAMS: 8, ')': -1, NonTerminals.COMPOUND_STMT: 12,
+             '#sf_size': -1, '#return_seq': -1, '#S_out_scope': -1}],
         7: [{'int': -1},
             {'void': -1}],
         8: [{'int': -1, 'ID': -1, NonTerminals.PARAM_PRIME: 11, NonTerminals.PARAM_LIST: 9},
@@ -250,6 +251,7 @@ class Parser:
     def __init__(self, scanner):
         self.scanner = scanner
         self.code_generator = CodeGenerator(scanner)
+        self.semantic_analyzer = SemanticAnalyzer(self.code_generator)
         self.errors = []
         self.parse_tree = Node('Program')
         self.state = 0
@@ -405,6 +407,12 @@ class Parser:
             self.code_generator.call_seq()
         elif symbol == '#sf_size':
             self.code_generator.sf_size()
+
+    def semantic(self, action):
+        if action == '#S_in_scope':
+            pass
+        elif action == '#S_out_scope':
+            pass
 
     def add_error(self, error):
         self.errors.append((self.scanner.current_line, error))
