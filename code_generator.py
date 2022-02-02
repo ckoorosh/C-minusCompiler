@@ -89,7 +89,7 @@ class CodeGenerator:
             result = self.get_temp()
             operand1 = self.semantic_stack.pop()
             operand2 = self.semantic_stack.pop()
-            self.add_code(("*", operand1, operand2, result))
+            self.add_code(("MULT", operand1, operand2, result))
             self.semantic_stack.append(result)
         except IndexError:
             pass
@@ -140,7 +140,7 @@ class CodeGenerator:
         try:
             operand = self.semantic_stack.pop()
             result = self.semantic_stack.pop()
-            self.add_code(("=", operand, result,))
+            self.add_code(("ASSIGN", operand, result,))
         except IndexError:
             pass
 
