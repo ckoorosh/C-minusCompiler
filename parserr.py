@@ -249,7 +249,7 @@ class Sets:
 class Parser:
     def __init__(self, scanner):
         self.scanner = scanner
-        self.code_generator = CodeGenerator()
+        self.code_generator = CodeGenerator(scanner)
         self.errors = []
         self.parse_tree = Node('Program')
         self.state = 0
@@ -259,6 +259,7 @@ class Parser:
 
     def get_next_token(self):
         self.current_token = self.scanner.get_next_token()
+        self.scanner.add_to_symbol_table(self.current_token)
 
     def get_current_lexeme(self):
         token, lexeme = self.current_token
@@ -345,7 +346,7 @@ class Parser:
                 elif edge.startswith('#S_'):  # Semantic Analyzer
                     pass
                 elif edge.startswith('#'):  # Intermediate Code Generator
-                    self.code_gen(edge, lexeme)
+                    self.code_gen(edge, self.get_current_lexeme()[1])
                     break
                 else:  # terminal
                     if edge == '':
@@ -387,7 +388,7 @@ class Parser:
         elif symbol == '#assign':
             self.code_generator.assign()
         elif symbol == '#push_id':
-            self.code_generator.push_id()
+            self.code_generator.push_id(token)
         elif symbol == '#push_const':
             self.code_generator.push_const(token)
         elif symbol == '#if_else':

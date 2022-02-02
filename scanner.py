@@ -136,6 +136,13 @@ class Scanner:
             self.tokens[self.current_line] = []
         self.tokens[self.current_line].append((token_type.name, lexeme))
 
+    def add_to_symbol_table(self, token):
+        if token is not None:
+            (token_type, lexeme) = token
+            if token_type == TokenType.KEYWORD or token_type == TokenType.ID:
+                if lexeme not in self.symbol_table:
+                    self.symbol_table.append(lexeme)
+
     def get_next_token(self):
         input_ended = False
         state = TokenState.INITIAL

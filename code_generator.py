@@ -1,5 +1,6 @@
 class CodeGenerator:
-    def __init__(self):
+    def __init__(self, scanner):
+        self.scanner = scanner
         self.semantic_stack = []
         self.break_stack = []
         self.program_block = []
@@ -140,13 +141,14 @@ class CodeGenerator:
         try:
             operand = self.semantic_stack.pop()
             result = self.semantic_stack.pop()
-            self.add_code(("=", operand, result,))
+            self.add_code(("ASSIGN", operand, result,))
         except IndexError:
             pass
 
-    def push_id(self):
+    def push_id(self, input_token):
         try:
-            id_address = ""  # TODO: find address of input using symbol table
+            print(self.scanner.symbol_table)
+            id_address = self.scanner.symbol_table.index(input_token)  # TODO: find address of input using symbol table
             self.semantic_stack.append(id_address)
         except IndexError:
             pass
