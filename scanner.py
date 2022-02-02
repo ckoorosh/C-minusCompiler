@@ -47,13 +47,21 @@ class TokenState(enum.Enum):
 
 class Scanner:
     SYMBOLS = [';', ':', ',', '[', ']', '(', ')', '{', '}', '+', '-', '<']
-    KEYWORDS = ['if', 'else', 'void', 'int', 'repeat', 'break', 'until', 'return', 'endif']
+    KEYWORDS = ['if', 'else', 'void', 'int',
+                'repeat', 'break', 'until', 'return', 'endif']
     WHITESPACES = [' ', '\r', '\t', '\v', '\f']
 
     def __init__(self, input_file, chunk_size=8192):
         self.tokens = dict()
         self.errors = dict()
-        self.symbol_table = []
+        self.symbol_table = [{
+        "lexeme": "output",
+        "fnuc/var": "function",
+        "no.Args": 1,
+        "type": "void",
+        "scope": 0
+         }]
+        self.scope_stack = [0]
         self.input_file = input_file
         self.text = ''
         self.file_pointer = 0
@@ -141,7 +149,7 @@ class Scanner:
             (token_type, lexeme) = token
             if token_type == TokenType.KEYWORD or token_type == TokenType.ID:
                 if lexeme not in self.symbol_table:
-                    self.symbol_table.append(lexeme)
+                    self.symbol_table.append({"lexeme" : lexeme, "scope" : len(self.scope_stack)-1})
 
     def get_next_token(self):
         input_ended = False
