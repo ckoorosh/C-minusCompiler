@@ -4,8 +4,8 @@ class SemanticAnalyzer:
         self.scanner = scanner
 
     def in_scope(self):
-        self.code_generator.scope_stack.append(len(self.scanner.symbol_table))
+        self.scanner.scope_stack.append(len(self.scanner.symbol_table))
 
     def out_scope(self):
-        scope_start = self.code_generator.scope_stack.pop()
+        scope_start = self.scanner.scope_stack.pop()
         self.scanner.symbol_table = self.scanner.symbol_table[:scope_start]

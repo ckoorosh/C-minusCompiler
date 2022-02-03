@@ -4,7 +4,6 @@ class CodeGenerator:
         self.semantic_stack = []
         self.break_stack = []
         self.program_block = []
-        self.scope_stack = [0]
         self.stack = [0]
         self.program_block_index = 0
         self.static_base_pointer = 100
@@ -50,7 +49,7 @@ class CodeGenerator:
         self.add_code('Placeholder')
 
     def init_program(self):
-        code = self.get_code("assign", f'#{self.static_base_pointer}', self.static_base_pointer)
+        code = self.get_code("assign", f'#{self.stack_base_pointer}', self.static_base_pointer)
         self.add_code(code)
         self.static_offset += 8
         for _ in range(3):

@@ -55,12 +55,12 @@ class Scanner:
         self.tokens = dict()
         self.errors = dict()
         self.symbol_table = [{
-        "lexeme": "output",
-        "fnuc/var": "function",
-        "no.Args": 1,
-        "type": "void",
-        "scope": 0
-         }]
+            "lexeme": "output",
+            "fnuc/var": "function",
+            "no.Args": 1,
+            "type": "void",
+            "scope": 0
+        }]
         self.scope_stack = [0]
         self.input_file = input_file
         self.text = ''
@@ -82,8 +82,8 @@ class Scanner:
 
     def init_symbol_table(self):
         for keyword in self.KEYWORDS:
-            #self.symbol_table.append(keyword)
-            self.symbol_table.append({"lexeme" : keyword, "scope" : len(self.scope_stack)-1})
+            # self.symbol_table.append(keyword)
+            self.symbol_table.append({"lexeme": keyword, "scope": len(self.scope_stack) - 1})
 
     def scan(self):
         token = self.get_next_token()
@@ -93,8 +93,8 @@ class Scanner:
                 if token is not None:
                     if token_type == TokenType.KEYWORD or token_type == TokenType.ID:
                         if lexeme not in self.symbol_table:
-                            #self.symbol_table.append(lexeme)
-                            self.symbol_table.append({"lexeme" : lexeme, "scope" : len(self.scope_stack)-1})
+                            # self.symbol_table.append(lexeme)
+                            self.symbol_table.append({"lexeme": lexeme, "scope": len(self.scope_stack) - 1})
                     self.add_token(token_type, lexeme)
 
                     token = self.get_next_token()
@@ -151,7 +151,7 @@ class Scanner:
             (token_type, lexeme) = token
             if token_type == TokenType.KEYWORD or token_type == TokenType.ID:
                 if lexeme not in self.symbol_table:
-                    self.symbol_table.append({"lexeme" : lexeme, "scope" : len(self.scope_stack)-1})
+                    self.symbol_table.append({"lexeme": lexeme, "scope": len(self.scope_stack) - 1})
 
     def get_next_token(self):
         input_ended = False
