@@ -99,7 +99,7 @@ class SemanticAnalyzer:
 
     
     def assign_param_role(self, input_token, line_number):
-        self.assign_var_role_routine(input_token, line_number, "param")
+        self.assign_var_role(input_token, line_number, "param")
 
 
     def assign_var_role(self, input_token, line_number, role="local_var"):
