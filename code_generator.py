@@ -13,6 +13,16 @@ class CodeGenerator:
         self.static_offset = 0
         self.offset = 0
         self.args_field_offset = 4
+        self.locals_field_offset = 0
+        self.array_field_offset = 0
+        self.temp_field_offset  = 0
+
+    def reset(self):
+        self.args_field_offset  = 4
+        self.locals_field_offset = 0
+        self.array_field_offset = 0
+        self.temp_field_offset  = 0
+
 
     def get_temp(self):
         temp = self.base_pointer + self.offset
