@@ -75,11 +75,25 @@ class CodeGenerator:
 
     # routines
 
+
+    def get_operand(self, operand):
+        if isinstance(operand, int):
+            address = operand
+        elif "address" in operand:
+            address = operand["address"] 
+        else:
+            temp = self.get_temp()
+            self.add_code(self.get_code(self.stack_base_pointer, f"#{operand['offset']}", temp))
+            address = f"@{temp}"
+        return address
+
+
+
     def add_op(self):
         try:
             result = self.get_temp()
-            operand1 = self.semantic_stack.pop()
-            operand2 = self.semantic_stack.pop()
+            operand1 = self.get_operand(self.semantic_stack.pop())
+            operand2 = self.get_operand(self.semantic_stack.pop())
             op = self.semantic_stack.pop()
             self.add_code((op, operand1, operand2, result))
             self.semantic_stack.append(result)
@@ -89,8 +103,8 @@ class CodeGenerator:
     def mult(self):
         try:
             result = self.get_temp()
-            operand1 = self.semantic_stack.pop()
-            operand2 = self.semantic_stack.pop()
+            operand1 = self.get_operand(self.semantic_stack.pop())
+            operand2 = self.get_operand(self.semantic_stack.pop())
             self.add_code(("MULT", operand1, operand2, result))
             self.semantic_stack.append(result)
         except IndexError:
