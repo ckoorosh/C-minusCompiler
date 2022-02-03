@@ -356,7 +356,7 @@ class Parser:
                             self.add_error(f'illegal {lexeme}')
                             self.get_next_token()
                 elif edge.startswith('#S_'):  # Semantic Analyzer
-                    self.semantic(edge)
+                    self.semantic(edge, self.get_current_lexeme()[1])
                     break
                 elif edge.startswith('#'):  # Intermediate Code Generator
                     self.code_gen(edge, self.get_current_lexeme()[1])
@@ -433,9 +433,9 @@ class Parser:
         elif action == '#S_assign_type':
             self.semantic_analyzer.assign_type(token)
         elif action == '#S_assign_var_role':
-            self.semantic_analyzer.assign_var_role(token)
+            self.semantic_analyzer.assign_var_role(token, self.scanner.current_line)
         elif action == '#S_assign_fun_role':
-            self.semantic_analyzer.assign_fun_role(token)
+            self.semantic_analyzer.assign_fun_role()
         elif action == '#S_assign_length':
             self.semantic_analyzer.assign_length(token)
         elif action == '#S_assign_fun_attributes':
@@ -443,25 +443,25 @@ class Parser:
         elif action == '#S_save_param':
             self.semantic_analyzer.save_param(token)
         elif action == '#S_assign_param_role':
-            self.semantic_analyzer.assign_param_role(token)
+            self.semantic_analyzer.assign_param_role(token, self.scanner.current_line)
         elif action == '#S_check_break':
             self.semantic_analyzer.check_break(token)
         elif action == '#S_check_declaration':
-            self.semantic_analyzer.check_declaration(token)
+            self.semantic_analyzer.check_declaration(token, self.scanner.current_line)
         elif action == '#S_save_fun':
             self.semantic_analyzer.save_fun(token)
         elif action == '#S_save_type_check':
             self.semantic_analyzer.save_type_check(token)
         elif action == '#S_push_arg_stack':
-            self.semantic_analyzer.push_arg_stack(token)
+            self.semantic_analyzer.push_arg_stack()
         elif action == '#S_check_args':
             self.semantic_analyzer.check_args(token)
         elif action == '#S_pop_arg_stack':
-            self.semantic_analyzer.pop_arg_stack(token)
+            self.semantic_analyzer.pop_arg_stack()
         elif action == '#S_index_array':
-            self.semantic_analyzer.index_array(token)
+            self.semantic_analyzer.index_array()
         elif action == '#S_index_array_pop':
-            self.semantic_analyzer.index_array_pop(token)
+            self.semantic_analyzer.index_array_pop()
         elif action == '#S_save_arg':
             self.semantic_analyzer.save_arg(token)
 
