@@ -11,5 +11,6 @@ def main(input_path):
     parser.parse()
 
 
+
 if __name__ == '__main__':
-    main('input2.txt')
+    main('input.txt')

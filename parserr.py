@@ -251,7 +251,7 @@ class Parser:
     def __init__(self, scanner):
         self.scanner = scanner
         self.code_generator = CodeGenerator(scanner)
-        self.semantic_analyzer = SemanticAnalyzer(self.code_generator)
+        self.semantic_analyzer = SemanticAnalyzer(self.code_generator, self.scanner)
         self.errors = []
         self.parse_tree = Node('Program')
         self.state = 0
@@ -346,7 +346,8 @@ class Parser:
                             self.add_error(f'illegal {lexeme}')
                             self.get_next_token()
                 elif edge.startswith('#S_'):  # Semantic Analyzer
-                    pass
+                    self.semantic(edge)
+                    break
                 elif edge.startswith('#'):  # Intermediate Code Generator
                     self.code_gen(edge, self.get_current_lexeme()[1])
                     break

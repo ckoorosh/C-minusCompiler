@@ -25,7 +25,7 @@ class CodeGenerator:
         return temp
 
     def get_code(self, opcode, *args):
-        code = "(" + opcode.upper()
+        code = "(" + str(opcode).upper()
         for i in range(3):
             try:
                 arg = args[i]
@@ -93,8 +93,8 @@ class CodeGenerator:
         try:
             result = self.get_temp()
             operand1 = self.get_operand(self.semantic_stack.pop())
-            operand2 = self.get_operand(self.semantic_stack.pop())
             op = self.semantic_stack.pop()
+            operand2 = self.get_operand(self.semantic_stack.pop())
             self.add_code((op, operand1, operand2, result))
             self.semantic_stack.append(result)
         except IndexError:
@@ -160,10 +160,19 @@ class CodeGenerator:
         except IndexError:
             pass
 
+    def find_addr(self, lexeme):
+        for i in range(len(self.scanner.symbol_table)):
+            print(self.scanner.symbol_table[i], "baghali")
+            if self.scanner.symbol_table[i]["lexeme"] == lexeme:
+                return i
+           
+        #TODO error
+        print("Errrrrrrrrrrrrrrror")
+
     def push_id(self, input_token):
         try:
-            print(self.scanner.symbol_table)
-            id_address = self.scanner.symbol_table.index(input_token)  # TODO: find address of input using symbol table
+            print(self.scanner.symbol_table, "chaghaliiiii")
+            id_address = self.find_addr(input_token)  # TODO: find address of input using symbol table
             self.semantic_stack.append(id_address)
         except IndexError:
             pass

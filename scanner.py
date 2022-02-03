@@ -82,7 +82,8 @@ class Scanner:
 
     def init_symbol_table(self):
         for keyword in self.KEYWORDS:
-            self.symbol_table.append(keyword)
+            #self.symbol_table.append(keyword)
+            self.symbol_table.append({"lexeme" : keyword, "scope" : len(self.scope_stack)-1})
 
     def scan(self):
         token = self.get_next_token()
@@ -92,7 +93,8 @@ class Scanner:
                 if token is not None:
                     if token_type == TokenType.KEYWORD or token_type == TokenType.ID:
                         if lexeme not in self.symbol_table:
-                            self.symbol_table.append(lexeme)
+                            #self.symbol_table.append(lexeme)
+                            self.symbol_table.append({"lexeme" : lexeme, "scope" : len(self.scope_stack)-1})
                     self.add_token(token_type, lexeme)
 
                     token = self.get_next_token()
