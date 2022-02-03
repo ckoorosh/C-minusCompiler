@@ -167,13 +167,13 @@ class SemanticAnalyzer:
             pass
 
     def check_declaration(self, input_token, line_number):
-        if "type" not in self.scanner.symbol_table[input_token[1]]:
+        if "type" not in self.scanner.symbol_table[self.code_generator.find_addr(input_token[1])]:
             lexim = self._get_lexim(input_token)
             self.scanner.error_flag = True
             self._semantic_errors.append((line_number, f"'{lexim}' is not defined."))
 
     def save_fun(self, input_token):
-        if self.scanner.symbol_table[input_token[1]].get("fnuc/var") == "function":
+        if self.scanner.symbol_table[self.code_generator.find_addr(input_token[1])].get("fnuc/var") == "function":
             self.semantic_stacks["fun_check"].append(input_token[1])
 
     def check_args(self, line_number):
@@ -206,7 +206,7 @@ class SemanticAnalyzer:
 
     def save_type_check(self, input_token):
         if input_token[0].name == "ID":
-            operand_type = self.scanner.symbol_table[input_token[1]].get("type")
+            operand_type = self.scanner.symbol_table[self.code_generator.find_addr(input_token[1])].get("type")
         else:
             operand_type = "int"
         self.semantic_stacks["type_check"].append(operand_type)
