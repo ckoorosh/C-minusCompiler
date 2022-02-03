@@ -70,15 +70,6 @@ class SemanticAnalyzer:
     ''' semantic routines start here '''
 
 
-    def inc_scope_routine(self, input_token, line_number):
-        self.scanner.scope_stack.append(len(self.scanner.symbol_table))
-
-
-    def dec_scope_routine(self, input_token, line_number):
-        scope_start_idx = self.scanner.scope_stack.pop()
-        self.scanner.symbol_table = self.scanner.symbol_table[:scope_start_idx]
-
-
     def save_main_routine(self, input_token, line_number):
         self.semantic_stacks["main_check"].append(self._get_lexim(input_token))
 

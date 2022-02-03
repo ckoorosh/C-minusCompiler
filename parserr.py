@@ -419,13 +419,51 @@ class Parser:
         elif symbol == '#sf_size':
             self.code_generator.sf_size()
 
-    def semantic(self, action):
+    def semantic(self, action, token):
         if action == '#S_in_scope':
             self.semantic_analyzer.in_scope()
         elif action == '#S_out_scope':
             self.semantic_analyzer.out_scope()
         elif action == '#S_save_main':
-            self.semantic_analyzer.save_main()
+            self.semantic_analyzer.save_main_routine(token)
+        elif action == '#S_save_main2':
+            self.semantic_analyzer.save_main_routine(token)
+        elif action == '#S_save_type':
+            self.semantic_analyzer.save_type_routine(token)
+        elif action == '#S_assign_type':
+            self.semantic_analyzer.assign_type_routine(token)
+        elif action == '#S_assign_var_role':
+            self.semantic_analyzer.assign_var_role_routine(token)
+        elif action == '#S_assign_fun_role':
+            self.semantic_analyzer.assign_fun_role_routine(token)
+        elif action == '#S_assign_length':
+            self.semantic_analyzer.assign_length_routine(token)
+        elif action == '#S_assign_fun_attributes':
+            self.semantic_analyzer.assign_length_routine(token)
+        elif action == '#S_save_param':
+            self.semantic_analyzer.save_param_routine(token)
+        elif action == '#S_assign_param_role':
+            self.semantic_analyzer.assign_param_role_routine(token)
+        elif action == '#S_check_break':
+            self.semantic_analyzer.check_break_routine(token)
+        elif action == '#S_check_declaration':
+            self.semantic_analyzer.check_declaration_routine(token)
+        elif action == '#S_save_fun':
+            self.semantic_analyzer.save_fun_routine(token)
+        elif action == '#S_save_type_check':
+            self.semantic_analyzer.save_type_check_routine(token)
+        elif action == '#S_push_arg_stack':
+            self.semantic_analyzer.push_arg_stack_routine(token)
+        elif action == '#S_check_args':
+            self.semantic_analyzer.check_args_routine(token)
+        elif action == '#S_pop_arg_stack':
+            self.semantic_analyzer.pop_arg_stack_routine(token)
+        elif action == '#S_index_array':
+            self.semantic_analyzer.index_array_routine(token)
+        elif action == '#S_index_array_pop':
+            self.semantic_analyzer.index_array_pop_routine(token)
+        elif action == '#S_save_arg':
+            self.semantic_analyzer.save_arg_routine(token)
 
     def add_error(self, error):
         self.errors.append((self.scanner.current_line, error))
