@@ -382,7 +382,6 @@ class Parser:
                         break
 
     def code_gen(self, symbol, token):
-        # TODO: Call semantic action routines
         print(symbol)
         if symbol == 'init':
             self.code_generator.init_program()

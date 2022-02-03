@@ -57,7 +57,7 @@ class CodeGenerator:
             self.program_block_index += 1
 
     def add_placeholder(self):
-        print('PLACEHOLDER')
+        print('Placeholder', len(self.program_block))
         self.add_code('Placeholder')
 
     def init_program(self):
@@ -71,7 +71,8 @@ class CodeGenerator:
         return_address = self.get_temp()
         self.program_block[1] = (1, self.get_code("SUB", self.static_base_pointer, "#4", return_address))
         self.program_block[2] = (2, self.get_code("assign", f"#{self.program_block_index}", f"@{return_address}"))
-        self.program_block[3] = (3, self.get_code("jp", self.scanner.symbol_table[self.scanner.find_address("main")]["address"]))
+        self.program_block[3] = (
+            3, self.get_code("jp", self.scanner.symbol_table[self.scanner.find_address("main")]["address"]))
 
     def save_output(self):
         codes = ''
@@ -91,21 +92,21 @@ class CodeGenerator:
             address = operand["address"]
         else:
             temp = self.get_temp()
-            self.add_code(self.get_code(self.stack_base_pointer, f"#{operand['offset']}", temp))
+            self.add_code(self.get_code("ADD", self.stack_base_pointer, f"#{operand['offset']}", temp))
             address = f"@{temp}"
         return address
 
-    def get_param_offset(self, arity=1):
+    def get_param_offset(self):
         offset = self.args_field_offset
         self.args_field_offset += 4
-        return
+        return offset
 
     def add_op(self):
         try:
+            op = self.semantic_stack.pop(-2)
             result = self.get_temp()
-            operand1 = self.get_operand(self.semantic_stack.pop())
-            op = self.semantic_stack.pop()
             operand2 = self.get_operand(self.semantic_stack.pop())
+            operand1 = self.get_operand(self.semantic_stack.pop())
             self.add_code((op, operand1, operand2, result))
             self.semantic_stack.append(result)
         except IndexError:
@@ -114,8 +115,8 @@ class CodeGenerator:
     def mult(self):
         try:
             result = self.get_temp()
-            operand1 = self.get_operand(self.semantic_stack.pop())
             operand2 = self.get_operand(self.semantic_stack.pop())
+            operand1 = self.get_operand(self.semantic_stack.pop())
             self.add_code(("MULT", operand1, operand2, result))
             self.semantic_stack.append(result)
         except IndexError:
@@ -154,10 +155,10 @@ class CodeGenerator:
 
     def relop(self):
         try:
+            op = self.semantic_stack.pop(-2)
             result = self.get_temp()
-            operand1 = self.semantic_stack.pop()
-            operand2 = self.semantic_stack.pop()
-            op = self.semantic_stack.pop()
+            operand2 = self.get_operand(self.semantic_stack.pop())
+            operand1 = self.get_operand(self.semantic_stack.pop())
             self.add_code((op, operand1, operand2, result))
             self.semantic_stack.append(result)
         except IndexError:
@@ -165,25 +166,21 @@ class CodeGenerator:
 
     def assign(self):
         try:
-            operand = self.semantic_stack.pop()
-            result = self.semantic_stack.pop()
-            self.add_code(("ASSIGN", operand, result,))
+            operand = self.get_operand(self.semantic_stack.pop())
+            result = self.get_operand(self.semantic_stack[-1])
+            self.add_code(("ASSIGN", operand, result))
         except IndexError:
             pass
 
     def push_id(self, input_token):
-        try:
-            id_address = self.scanner.find_address(input_token)
-            self.semantic_stack.append(id_address)
-        except IndexError:
-            pass
+        id_address = self.scanner.find_address(input_token)
+        self.semantic_stack.append(self.scanner.symbol_table[id_address])
 
     def push_const(self, input_token):
         try:
             constant_value = "#" + input_token
             address = self.get_static()
             self.add_code(self.get_code("ASSIGN", constant_value, address))
-            # TODO: find address of input using symbol table
             self.semantic_stack.append(address)
         except IndexError:
             pass
@@ -197,12 +194,11 @@ class CodeGenerator:
 
     def else_(self):
         try:
-            # print(self.semantic_stack)
             jump_address = self.semantic_stack.pop()
-            condition = self.semantic_stack.pop()
+            condition = self.get_operand(self.semantic_stack.pop())
+            self.semantic_stack.append(self.program_block_index)
             self.add_placeholder()
             self.add_code(("jpf", condition, self.program_block_index), jump_address, True, False)
-            self.semantic_stack.append(self.program_block_index)
         except IndexError:
             pass
 
@@ -282,8 +278,8 @@ class CodeGenerator:
                         self.get_code("ADD", self.static_base_pointer, f"#{arg['offset']}", temp),
                         insert=backpatch)
                     arg_address = f"@{temp}"
-                if callee["params"][-i - 1] == "array":
-                    arg_address = f"#{arg}"  # pass by reference
+                # if callee["params"][-i - 1] == "array":
+                #     arg_address = f"#{arg}"  # pass by reference
                 self.add_code(self.get_code("assign", arg_address, f"@{t_args}"), insert=backpatch)
                 self.add_code(self.get_code("ADD", t_args, "#4", t_args), insert=backpatch)
             fun_addr = stack.pop()["address"]
@@ -310,7 +306,7 @@ class CodeGenerator:
             arg_counter = [len(l) for l in self.scanner.arg_list_stack]
             self.call_seq_stack += self.semantic_stack[-(arg_counter[-1] + 1):]
             num_offset_vars = 0
-            for i in range(1, callee["arity"] + 1):
+            for i in range(1, callee["no.Args"] + 1):
                 arg = self.semantic_stack[-i]
                 if not isinstance(arg, int) and "offset" in arg:
                     num_offset_vars += 1
@@ -322,7 +318,7 @@ class CodeGenerator:
             self.call_seq_stack.append(t_ret_val)
             self.call_seq_stack.append(callee)
 
-            for _ in range(10 + callee["arity"] * 2 + num_offset_vars):  # reserve space for call seq
+            for _ in range(10 + callee["no.Args"] * 2 + num_offset_vars):  # reserve space for call seq
                 self.add_placeholder()
 
         if backpatch:

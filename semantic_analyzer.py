@@ -52,7 +52,7 @@ class SemanticAnalyzer:
             semantic_errors.append("The input program is semantically correct.\n")
         return "".join(semantic_errors)
 
-    def _get_lexim(self, token):
+    def get_lexeme(self, token):
         if token[0] == "ID":
             return self.scanner.symbol_table[token[1]]['lexeme']
         else:
@@ -65,7 +65,7 @@ class SemanticAnalyzer:
     ''' semantic routines start here '''
 
     def save_main(self, input_token):
-        self.semantic_stacks["main_check"].append(self._get_lexim(input_token))
+        self.semantic_stacks["main_check"].append(self.get_lexeme(input_token))
 
     def pop_main(self):
         self.semantic_stacks["main_check"] = self.semantic_stacks["main_check"][:-2]
@@ -103,7 +103,7 @@ class SemanticAnalyzer:
             if symbol_row["type"] == "void":
                 self.scanner.error_flag = True
                 self._semantic_errors.append(
-                    (line_number, "Illegal type of void for '{}'.".format(symbol_row["lexim"])))
+                    (line_number, "Illegal type of void for '{}'.".format(symbol_row["lexeme"])))
                 symbol_row.pop("type")  # void types are not considered to be defined
             if input_token[1] == "[":
                 symbol_row["type"] = "array"
@@ -173,9 +173,9 @@ class SemanticAnalyzer:
 
     def check_declaration(self, input_token, line_number):
         if "type" not in self.scanner.symbol_table[self.scanner.find_address(input_token[1])]:
-            lexim = self._get_lexim(input_token)
+            lexeme = self.get_lexeme(input_token)
             self.scanner.error_flag = True
-            self._semantic_errors.append((line_number, f"'{lexim}' is not defined."))
+            self._semantic_errors.append((line_number, f"'{lexeme}' is not defined."))
 
     def save_fun(self, input_token):
         if self.scanner.symbol_table[self.scanner.find_address(input_token[1])].get(
@@ -185,22 +185,23 @@ class SemanticAnalyzer:
     def check_args(self, line_number):
         if self.semantic_stacks["fun_check"]:
             fun_id = self.semantic_stacks["fun_check"].pop()
-            lexim = self.scanner.symbol_table[self.scanner.find_address(fun_id)]["lexeme"]
+            lexeme = self.scanner.symbol_table[self.scanner.find_address(fun_id)]["lexeme"]
             args = self.scanner.arg_list_stack[-1]
             if args is not None:
                 self.semantic_stacks["type_check"] = self.semantic_stacks["type_check"][:len(args)]
                 if self.scanner.symbol_table[self.scanner.find_address(fun_id)]["no.Args"] != len(args):
                     self.scanner.error_flag = True
-                    self._semantic_errors.append((line_number, f"Mismatch in numbers of arguments of '{lexim}'."))
+                    self._semantic_errors.append((line_number, f"Mismatch in numbers of arguments of '{lexeme}'."))
                 else:
-                    params = self.scanner.symbol_table[self.scanner.find_address(fun_id)]["params"]
-                    i = 1
-                    for param, arg in zip(params, args):
-                        if param != arg and arg is not None:
-                            self.scanner.error_flag = True
-                            self._semantic_errors.append((line_number,
-                                                          f"Mismatch in type of argument {i} of '{lexim}'. Expected '{param}' but got '{arg}' instead."))
-                        i += 1
+                    pass
+                    # params = self.scanner.symbol_table[self.scanner.find_address(fun_id)]["params"]
+                    # i = 1
+                    # for param, arg in zip(params, args):
+                    #     if param != arg and arg is not None:
+                    #         self.scanner.error_flag = True
+                    #         self._semantic_errors.append((line_number,
+                    #                                       f"Mismatch in type of argument {i} of '{lexeme}'. Expected '{param}' but got '{arg}' instead."))
+                    #     i += 1
 
     def check_break(self, line_number):
         if self.while_counter <= 0 and self.switch_counter <= 0:
