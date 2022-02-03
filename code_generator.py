@@ -15,14 +15,13 @@ class CodeGenerator:
         self.args_field_offset = 4
         self.locals_field_offset = 0
         self.array_field_offset = 0
-        self.temp_field_offset  = 0
+        self.temp_field_offset = 0
 
     def reset(self):
-        self.args_field_offset  = 4
+        self.args_field_offset = 4
         self.locals_field_offset = 0
         self.array_field_offset = 0
-        self.temp_field_offset  = 0
-
+        self.temp_field_offset = 0
 
     def get_temp(self):
         temp = self.base_pointer + self.offset
@@ -58,6 +57,7 @@ class CodeGenerator:
             self.program_block_index += 1
 
     def add_placeholder(self):
+        print('PLACEHOLDER')
         self.add_code('Placeholder')
 
     def init_program(self):
@@ -71,7 +71,7 @@ class CodeGenerator:
         return_address = self.get_temp()
         self.program_block[1] = (1, self.get_code("SUB", self.static_base_pointer, "#4", return_address))
         self.program_block[2] = (2, self.get_code("assign", f"#{self.program_block_index}", f"@{return_address}"))
-        # self.program_block[3] = (3, self.get_code("jp", SymbolTableManager.findrow("main")["address"]))
+        self.program_block[3] = (3, self.get_code("jp", self.scanner.symbol_table[self.scanner.find_address("main")]["address"]))
 
     def save_output(self):
         codes = ''
@@ -83,8 +83,6 @@ class CodeGenerator:
 
         with open('output.txt', 'w') as file:
             file.write(codes)
-
-    # routines
 
     def get_operand(self, operand):
         if isinstance(operand, int):
@@ -303,7 +301,7 @@ class CodeGenerator:
                 insert=backpatch)
             self.add_code(self.get_code("jp", fun_addr), insert=backpatch)
             self.add_code(self.get_code("assign", f"@{t_ret_val_callee}", t_ret_val),
-                                      insert=backpatch)
+                          insert=backpatch)
             self.add_code(self.get_code("SUB", top_sp, f"#{frame_size}", top_sp), insert=backpatch)
             # self._add_three_addr_code(self._get_three_addr_code("print", top_sp), insert=backpatch)
         else:
@@ -337,7 +335,6 @@ class CodeGenerator:
 
     def sf_size(self):
         scope_stack, symbol_table = self.scanner.scope_stack, self.scanner.symbol_table
-        print(symbol_table)
         fun_row = symbol_table[scope_stack[-1] - 1]
         fun_row["args_size"] = 0
         fun_row["locals_size"] = 0

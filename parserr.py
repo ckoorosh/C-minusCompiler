@@ -304,6 +304,10 @@ class Parser:
     def get_epsilon(self, state):
         for path in Sets.TRANSITIONS[state]:
             edge = list(path.keys())[0]
+            for e in path.keys():
+                if (path[e] == -1 and not e.startswith('#')) or path[e] != -1:
+                    edge = e
+                    break
             next_state = path[edge]
             if next_state == -1:
                 if edge == '':
@@ -319,8 +323,8 @@ class Parser:
     def parse(self):
         self.code_gen('init', None)
         self._parse(0)
-        self.code_generator.save_output()
         self.code_gen('finish', None)
+        self.code_generator.save_output()
 
     def _parse(self, state, parent=None):
         if NonTerminals(state).name != "PROGRAM":

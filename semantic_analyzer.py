@@ -141,7 +141,8 @@ class SemanticAnalyzer:
 
     def save_arg(self, input_token):
         if input_token[0].name == "ID":
-            self.scanner.arg_list_stack[-1].append(self.scanner.symbol_table[input_token[1]].get("type"))
+            self.scanner.arg_list_stack[-1].append(
+                self.scanner.symbol_table[self.scanner.find_address(input_token[1])].get("type"))
         else:
             self.scanner.arg_list_stack[-1].append("int")
 
@@ -171,8 +172,7 @@ class SemanticAnalyzer:
             pass
 
     def check_declaration(self, input_token, line_number):
-        if "type" not in self.scanner.symbol_table[
-            self.scanner.find_address(input_token[1])]:
+        if "type" not in self.scanner.symbol_table[self.scanner.find_address(input_token[1])]:
             lexim = self._get_lexim(input_token)
             self.scanner.error_flag = True
             self._semantic_errors.append((line_number, f"'{lexim}' is not defined."))
@@ -185,15 +185,15 @@ class SemanticAnalyzer:
     def check_args(self, line_number):
         if self.semantic_stacks["fun_check"]:
             fun_id = self.semantic_stacks["fun_check"].pop()
-            lexim = self.scanner.symbol_table[fun_id]["lexeme"]
+            lexim = self.scanner.symbol_table[self.scanner.find_address(fun_id)]["lexeme"]
             args = self.scanner.arg_list_stack[-1]
             if args is not None:
                 self.semantic_stacks["type_check"] = self.semantic_stacks["type_check"][:len(args)]
-                if self.scanner.symbol_table[fun_id]["no.Args"] != len(args):
+                if self.scanner.symbol_table[self.scanner.find_address(fun_id)]["no.Args"] != len(args):
                     self.scanner.error_flag = True
                     self._semantic_errors.append((line_number, f"Mismatch in numbers of arguments of '{lexim}'."))
                 else:
-                    params = self.scanner.symbol_table[fun_id]["params"]
+                    params = self.scanner.symbol_table[self.scanner.find_address(fun_id)]["params"]
                     i = 1
                     for param, arg in zip(params, args):
                         if param != arg and arg is not None:
