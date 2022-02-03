@@ -1,7 +1,11 @@
-0	(ASSIGN, #12, 100, )
-1	(ASSIGN, 100, 14, )
-2	(ASSIGN, #7, 104, )
-3	(ASSIGN, 104, 16, )
-4	(SUB, 100, #4, 500)
-5	(ASSIGN, @500, 504, )
-6	(JP, @504, , )
+0	(ASSIGN, #1000, 100, )
+1	Placeholder
+2	Placeholder
+3	Placeholder
+4	(ASSIGN, #12, 120, )
+5	(ASSIGN, 120, 14, )
+6	(ASSIGN, #7, 124, )
+7	(ASSIGN, 124, 16, )
+8	(SUB, 100, #4, 500)
+9	(ASSIGN, @500, 504, )
+10	(JP, @504, , )
