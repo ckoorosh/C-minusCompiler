@@ -68,6 +68,10 @@ class Scanner:
         self.current_line = 1
         self.unclosed_comment_size = 7
         self.chunk_size = chunk_size
+        self.declaration_flag = False
+        self.error_flag = False
+        self.arg_list_stack = []
+        self.temp_stack = []
         self.read_text()
         self.init_symbol_table()
 

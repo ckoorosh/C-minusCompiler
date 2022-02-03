@@ -11,6 +11,7 @@ class CodeGenerator:
         self.stack_base_pointer = 1000
         self.static_offset = 0
         self.offset = 0
+        self.args_field_offset = 4
 
     def get_temp(self):
         temp = self.base_pointer + self.offset
@@ -86,6 +87,11 @@ class CodeGenerator:
             address = f"@{temp}"
         return address
 
+
+    def get_param_offset(self, arity=1):
+        offset = self.args_field_offset
+        self.args_field_offset += 4
+        return 
 
 
     def add_op(self):
