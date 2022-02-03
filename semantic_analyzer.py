@@ -70,20 +70,20 @@ class SemanticAnalyzer:
     ''' semantic routines start here '''
 
 
-    def save_main_routine(self, input_token, line_number):
+    def save_main_routine(self, input_token):
         self.semantic_stacks["main_check"].append(self._get_lexim(input_token))
 
 
-    def pop_main_routine(self, input_token, line_number):
+    def pop_main_routine(self):
         self.semantic_stacks["main_check"] = self.semantic_stacks["main_check"][:-2]
 
     
-    def save_type_routine(self, input_token, line_number):
+    def save_type_routine(self, input_token):
         self.scanner.declaration_flag = True
         self.semantic_stacks["type_assign"].append(input_token[1])
 
 
-    def assign_type_routine(self, input_token, line_number):
+    def assign_type_routine(self, input_token):
         if input_token[0] == "ID" and self.semantic_stacks["type_assign"]:
             symbol_idx = input_token[1]
             self.scanner.symbol_table[symbol_idx]["type"] = self.semantic_stacks["type_assign"].pop()
@@ -91,7 +91,7 @@ class SemanticAnalyzer:
             self.scanner.declaration_flag = False
         
 
-    def assign_fun_role_routine(self, input_token, line_number):
+    def assign_fun_role_routine(self):
         if self.semantic_stacks["type_assign"]:
             symbol_idx = self.semantic_stacks["type_assign"][-1]
             self.scanner.symbol_table[symbol_idx]["fnuc/var"] = "function"
@@ -117,7 +117,7 @@ class SemanticAnalyzer:
                 symbol_row["type"] = "array"
 
 
-    def assign_length_routine(self, input_token, line_number):
+    def assign_length_routine(self, input_token):
         if self.semantic_stacks["type_assign"]:
             symbol_idx = self.semantic_stacks["type_assign"].pop()
             symbol_row = self.scanner.symbol_table[symbol_idx]
@@ -138,27 +138,27 @@ class SemanticAnalyzer:
                 self.fun_param_list[-1] = "array"
             
 
-    def save_param_routine(self, input_token, line_number):
+    def save_param_routine(self, input_token):
         self.fun_param_list.append(input_token[1])
 
     
-    def push_arg_stack_routine(self, input_token, line_number):
+    def push_arg_stack_routine(self):
         self.scanner.arg_list_stack.append([])
 
 
-    def pop_arg_stack_routine(self, input_token, line_number):
+    def pop_arg_stack_routine(self):
         if len(self.scanner.arg_list_stack) > 1:
             self.scanner.arg_list_stack.pop()
 
     
-    def save_arg_routine(self, input_token, line_number):
+    def save_arg_routine(self, input_token):
         if input_token[0] == "ID":
             self.scanner.arg_list_stack[-1].append(self.scanner.symbol_table[input_token[1]].get("type"))
         else:
             self.scanner.arg_list_stack[-1].append("int")
 
 
-    def assign_fun_attrs_routine(self, input_token, line_number):
+    def assign_fun_attrs_routine(self):
         if self.semantic_stacks["type_assign"]:
             symbol_idx = self.semantic_stacks["type_assign"].pop()
             params = self.fun_param_list
@@ -168,7 +168,7 @@ class SemanticAnalyzer:
             self.scanner.temp_stack.append(0) # init temp counter for this function
 
 
-    def check_main_routine(self, input_token, line_number):
+    def check_main_routine(self):
         main_signature = ("void", "main", "void")
         try:
             top_three = tuple(self.semantic_stacks["main_check"][-3:])
@@ -191,12 +191,12 @@ class SemanticAnalyzer:
             self._semantic_errors.append((line_number, f"'{lexim}' is not defined."))
 
     
-    def save_fun_routine(self, input_token, line_number):
+    def save_fun_routine(self, input_token):
         if self.scanner.symbol_table[input_token[1]].get("fnuc/var") == "function":
             self.semantic_stacks["fun_check"].append(input_token[1])
 
 
-    def check_args_routine(self, input_token, line_number):
+    def check_args_routine(self, line_number):
         if self.semantic_stacks["fun_check"]:
             fun_id = self.semantic_stacks["fun_check"].pop()
             lexim = self.scanner.symbol_table[fun_id]["lexeme"]
@@ -216,35 +216,35 @@ class SemanticAnalyzer:
                         i += 1
 
 
-    def push_while_routine(self, input_token, line_number):
+    def push_while_routine(self):
         self.while_counter += 1
 
 
-    def check_while_routine(self, input_token, line_number):
+    def check_while_routine(self, line_number):
         if self.while_counter <= 0:
             self.scanner.error_flag = True
             self._semantic_errors.append((line_number, f"No 'while' found for 'continue'"))
 
 
-    def pop_while_routine(self, input_token, line_number):
+    def pop_while_routine(self):
         self.while_counter -= 1
 
     
-    def push_switch_routine(self, input_token, line_number):
+    def push_switch_routine(self):
         self.switch_counter += 1
 
 
-    def check_break_routine(self, input_token, line_number):
+    def check_break_routine(self, line_number):
         if self.while_counter <= 0 and self.switch_counter <= 0:
             self.scanner.error_flag = True
             self._semantic_errors.append((line_number, "No 'while' or 'switch' found for 'break'."))
 
 
-    def pop_switch_routine(self, input_token, line_number):
+    def pop_switch_routine(self):
         self.switch_counter -= 1
 
 
-    def save_type_check_routine(self, input_token, line_number):
+    def save_type_check_routine(self, input_token):
         if input_token[0] == "ID":
             operand_type = self.scanner.symbol_table[input_token[1]].get("type")
         else:
@@ -252,17 +252,17 @@ class SemanticAnalyzer:
         self.semantic_stacks["type_check"].append(operand_type)
     
 
-    def index_array_routine(self, input_token, line_number):
+    def index_array_routine(self):
         if self.semantic_stacks["type_check"]:
             self.semantic_stacks["type_check"][-1] = "int"
 
 
-    def index_array_pop_routine(self, input_token, line_number):
+    def index_array_pop_routine(self):
         if self.semantic_stacks["type_check"]:
             self.semantic_stacks["type_check"].pop()
 
 
-    def type_check_routine(self, input_token, line_number):
+    def type_check_routine(self, line_number):
         try:
             operand_b_type = self.semantic_stacks["type_check"].pop()
             operand_a_type = self.semantic_stacks["type_check"].pop()
