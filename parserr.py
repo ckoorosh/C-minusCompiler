@@ -420,7 +420,7 @@ class Parser:
             self.code_generator.sf_size()
 
     def semantic(self, action, token):
-        print('S', action)
+        # print('S', action)
         if action == '#S_in_scope':
             self.semantic_analyzer.in_scope()
         elif action == '#S_out_scope':

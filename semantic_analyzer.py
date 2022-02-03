@@ -77,16 +77,18 @@ class SemanticAnalyzer:
     def assign_type(self, input_token):
         if input_token[0].name == "ID" and self.semantic_stacks["type_assign"]:
             symbol_idx = input_token[1]
-            self.scanner.symbol_table[self.code_generator.find_addr(symbol_idx)]["type"] = self.semantic_stacks["type_assign"].pop()
+            self.scanner.symbol_table[self.scanner.find_address(symbol_idx)]["type"] = \
+                self.semantic_stacks["type_assign"].pop()
             self.semantic_stacks["type_assign"].append(symbol_idx)
             self.scanner.declaration_flag = False
 
     def assign_fun_role(self):
-        print(self.semantic_stacks["type_assign"])
         if self.semantic_stacks["type_assign"]:
             symbol_idx = self.semantic_stacks["type_assign"][-1]
-            self.scanner.symbol_table[self.code_generator.find_addr(symbol_idx)]["fnuc/var"] = "function"
-            self.scanner.symbol_table[self.code_generator.find_addr(symbol_idx)]["address"] = self.code_generator.program_block_index
+            self.scanner.symbol_table[self.scanner.find_address(symbol_idx)][
+                "fnuc/var"] = "function"
+            self.scanner.symbol_table[self.scanner.find_address(symbol_idx)][
+                "address"] = self.code_generator.program_block_index
 
     def assign_param_role(self, input_token, line_number):
         self.assign_var_role(input_token, line_number, "param")
@@ -94,7 +96,7 @@ class SemanticAnalyzer:
     def assign_var_role(self, input_token, line_number, role="local_var"):
         if self.semantic_stacks["type_assign"]:
             symbol_idx = self.semantic_stacks["type_assign"][-1]
-            symbol_row = self.scanner.symbol_table[self.code_generator.find_addr(symbol_idx)]
+            symbol_row = self.scanner.symbol_table[self.scanner.find_address(symbol_idx)]
             symbol_row["fnuc/var"] = role
             if self.scope == 0:
                 symbol_row["fnuc/var"] = "global_var"
@@ -109,7 +111,7 @@ class SemanticAnalyzer:
     def assign_length(self, input_token):
         if self.semantic_stacks["type_assign"]:
             symbol_idx = self.semantic_stacks["type_assign"].pop()
-            symbol_row = self.scanner.symbol_table[self.code_generator.find_addr(symbol_idx)]
+            symbol_row = self.scanner.symbol_table[self.scanner.find_address(symbol_idx)]
             if input_token[0].name == "NUM":
                 symbol_row["no.Args"] = int(input_token[1])
                 if symbol_row["fnuc/var"] == "param":
@@ -117,7 +119,8 @@ class SemanticAnalyzer:
                 else:
                     symbol_row["address"] = self.code_generator.get_static(int(input_token[1]))
             else:
-                self.scanner.symbol_table[self.code_generator.find_addr(symbol_idx)]["no.Args"] = 1
+                self.scanner.symbol_table[self.scanner.find_address(symbol_idx)][
+                    "no.Args"] = 1
                 if symbol_row["fnuc/var"] == "param":
                     symbol_row["offset"] = self.code_generator.get_param_offset()
                 else:
@@ -146,7 +149,8 @@ class SemanticAnalyzer:
         if self.semantic_stacks["type_assign"]:
             symbol_idx = self.semantic_stacks["type_assign"].pop()
             params = self.fun_param_list
-            self.scanner.symbol_table[self.code_generator.find_addr(symbol_idx)]["no.Args"] = len(params)
+            self.scanner.symbol_table[self.scanner.find_address(symbol_idx)][
+                "no.Args"] = len(params)
             # self.scanner.symbol_table[symbol_idx]["params"] = params
             self.fun_param_list = []
             self.scanner.temp_stack.append(0)  # init temp counter for this function
@@ -167,13 +171,15 @@ class SemanticAnalyzer:
             pass
 
     def check_declaration(self, input_token, line_number):
-        if "type" not in self.scanner.symbol_table[self.code_generator.find_addr(input_token[1])]:
+        if "type" not in self.scanner.symbol_table[
+            self.scanner.find_address(input_token[1])]:
             lexim = self._get_lexim(input_token)
             self.scanner.error_flag = True
             self._semantic_errors.append((line_number, f"'{lexim}' is not defined."))
 
     def save_fun(self, input_token):
-        if self.scanner.symbol_table[self.code_generator.find_addr(input_token[1])].get("fnuc/var") == "function":
+        if self.scanner.symbol_table[self.scanner.find_address(input_token[1])].get(
+                "fnuc/var") == "function":
             self.semantic_stacks["fun_check"].append(input_token[1])
 
     def check_args(self, line_number):
@@ -206,7 +212,8 @@ class SemanticAnalyzer:
 
     def save_type_check(self, input_token):
         if input_token[0].name == "ID":
-            operand_type = self.scanner.symbol_table[self.code_generator.find_addr(input_token[1])].get("type")
+            operand_type = self.scanner.symbol_table[
+                self.scanner.find_address(input_token[1])].get("type")
         else:
             operand_type = "int"
         self.semantic_stacks["type_check"].append(operand_type)

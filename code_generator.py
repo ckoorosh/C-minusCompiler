@@ -4,6 +4,7 @@ class CodeGenerator:
         self.semantic_stack = []
         self.break_stack = []
         self.program_block = []
+        self.call_seq_stack = []
         self.stack = [0]
         self.program_block_index = 0
         self.static_base_pointer = 100
@@ -79,19 +80,17 @@ class CodeGenerator:
         if isinstance(operand, int):
             address = operand
         elif "address" in operand:
-            address = operand["address"] 
+            address = operand["address"]
         else:
             temp = self.get_temp()
             self.add_code(self.get_code(self.stack_base_pointer, f"#{operand['offset']}", temp))
             address = f"@{temp}"
         return address
 
-
     def get_param_offset(self, arity=1):
         offset = self.args_field_offset
         self.args_field_offset += 4
         return
-
 
     def add_op(self):
         try:
@@ -164,19 +163,9 @@ class CodeGenerator:
         except IndexError:
             pass
 
-    def find_addr(self, lexeme):
-        for i in range(len(self.scanner.symbol_table)):
-            # print(self.scanner.symbol_table[i], "baghali")
-            if self.scanner.symbol_table[i]["lexeme"] == lexeme:
-                return i
-
-        # TODO error
-        print("Errrrrrrrrrrrrrrror")
-
     def push_id(self, input_token):
         try:
-            # print(self.scanner.symbol_table, "chaghaliiiii")
-            id_address = self.find_addr(input_token)  # TODO: find address of input using symbol table
+            id_address = self.scanner.find_address(input_token)
             self.semantic_stack.append(id_address)
         except IndexError:
             pass
@@ -233,150 +222,139 @@ class CodeGenerator:
         self.add_code(self.get_code("jp", f"@{temp}"))
 
     def call_seq(self, backpatch=False):
-        pass
+        stack = self.semantic_stack if not backpatch else self.call_seq_stack
 
-    #     ''' expects semantic stack to contain:
-    #         ----------------------------------
-    #         ss(top)         = arg_n addr
-    #         ...
-    #         ss(top - n + 2) = arg_2 addr
-    #         ss(top - n + 1) = arg_1 addr
-    #         ss(top - n)     = fun   addr
-    #     '''
-    #     stack = self.semantic_stack if not backpatch else self.call_seq_stack
-    #
-    #     if backpatch:
-    #         callee = stack.pop()
-    #         store_idx = MemoryManager.pb_index
-    #         t_ret_val = stack.pop()
-    #         self.arg_counter[-1] = stack.pop()
-    #         self.program_block_index = stack.pop()
-    #     else:
-    #         callee = stack[-(self.arg_counter[-1] + 1)]
-    #
-    #     caller = SymbolTableManager.get_enclosing_fun()
-    #
-    #     if callee["lexim"] == "output":
-    #         arg = stack.pop()
-    #         stack.pop()  # pop output row off the stack
-    #         arg_addr = self._resolve_addr(arg)
-    #         self._add_three_addr_code(self._get_three_addr_code("assign", arg_addr, self.print_addr))
-    #         self._add_three_addr_code(self._get_three_addr_code("PRINT", self.print_addr))
-    #         self.arg_counter[-1] = 0
-    #         self.semantic_stack.append("void")
-    #         return
-    #
-    #     if not backpatch:
-    #         t_ret_val = self.get_temp()
-    #
-    #     if "frame_size" in caller:
-    #         # current top_sp and access link pointer
-    #         top_sp = self.stack_frame_ptr_addr
-    #         frame_size = caller["frame_size"]
-    #         t_new_top_sp = MemoryManager.get_temp()
-    #         self._add_three_addr_code(self._get_add_code(top_sp, f"#{frame_size}", t_new_top_sp), insert=backpatch)
-    #         # assign access link address to new stack frame
-    #         self._add_three_addr_code(self._get_three_addr_code("assign", top_sp, f"@{t_new_top_sp}"), insert=backpatch)
-    #         t_args = MemoryManager.get_temp()
-    #         self._add_three_addr_code(self._get_add_code(t_new_top_sp, "#4", t_args), insert=backpatch)
-    #         n_args = callee["arity"]
-    #         args = stack[-n_args:]
-    #         for i in range(n_args):
-    #             stack.pop()
-    #             arg = args[i]
-    #             if isinstance(arg, int):
-    #                 arg_addr = arg
-    #             elif "address" in arg:
-    #                 arg_addr = arg["address"]  # static address
-    #             else:
-    #                 # need to calculate dynamic address
-    #                 t_arg_addr = MemoryManager.get_temp()
-    #                 self._add_three_addr_code(
-    #                     self._get_add_code(self.stack_frame_ptr_addr, f"#{arg['offset']}", t_arg_addr),
-    #                     insert=backpatch)
-    #                 arg_addr = f"@{t_arg_addr}"
-    #             if callee["params"][-i - 1] == "array":
-    #                 arg_addr = f"#{arg}"  # pass by reference
-    #             self._add_three_addr_code(self._get_three_addr_code("assign", arg_addr, f"@{t_args}"), insert=backpatch)
-    #             self._add_three_addr_code(self._get_add_code(t_args, "#4", t_args), insert=backpatch)
-    #         fun_addr = stack.pop()["address"]
-    #         # put pointers for return address and return value in temp variables
-    #         t_ret_addr = MemoryManager.get_temp()
-    #         t_ret_val_callee = MemoryManager.get_temp()
-    #         self._add_three_addr_code(self._get_sub_code(t_new_top_sp, "#4", t_ret_addr), insert=backpatch)
-    #         self._add_three_addr_code(self._get_sub_code(t_new_top_sp, "#8", t_ret_val_callee), insert=backpatch)
-    #         # increment stack frame pointer by frame size TODO: update stack pointer via access link and static offset
-    #         # self._add_three_addr_code(self._get_add_code(top_sp, f"#{frame_size}", top_sp), insert=backpatch)
-    #         self._add_three_addr_code(self._get_three_addr_code("assign", t_new_top_sp, top_sp), insert=backpatch)
-    #         # self._add_three_addr_code(self._get_three_addr_code("print", top_sp), insert=backpatch)
-    #         # assign value for return address in callee stack frame
-    #         self._add_three_addr_code(
-    #             self._get_three_addr_code("assign", f"#{MemoryManager.pb_index + 2}", f"@{t_ret_addr}"),
-    #             insert=backpatch)
-    #         # jump to function address
-    #         self._add_three_addr_code(self._get_three_addr_code("jp", fun_addr), insert=backpatch)
-    #         # fetch the return value to a temporary and push it to the stack
-    #         self._add_three_addr_code(self._get_three_addr_code("assign", f"@{t_ret_val_callee}", t_ret_val),
-    #                                   insert=backpatch)
-    #         # decrement stack frame pointer by frame size
-    #         self._add_three_addr_code(self._get_sub_code(top_sp, f"#{frame_size}", top_sp), insert=backpatch)
-    #         # self._add_three_addr_code(self._get_three_addr_code("print", top_sp), insert=backpatch)
-    #     else:  # in recursive calls we need to backpatch
-    #         callee = stack[-(self.arg_counter[-1] + 1)]
-    #         self.call_seq_stack += self.semantic_stack[-(self.arg_counter[-1] + 1):]
-    #         num_offset_vars = 0
-    #         for i in range(1, callee["arity"] + 1):
-    #             arg = self.semantic_stack[-i]
-    #             if not isinstance(arg, int) and "offset" in arg:
-    #                 num_offset_vars += 1
-    #         self.semantic_stack = self.semantic_stack[:-(self.arg_counter[-1] + 1)]
-    #         self.call_seq_stack.append(MemoryManager.pb_index)
-    #         self.call_seq_stack.append(self.arg_counter[-1])
-    #         self.call_seq_stack.append(t_ret_val)
-    #         self.call_seq_stack.append(callee)
-    #
-    #         for _ in range(10 + callee["arity"] * 2 + num_offset_vars):  # reserve space for call seq
-    #             self._add_placeholder()
-    #
-    #     if backpatch:
-    #         self.program_block_index = store_idx
-    #     else:
-    #         if callee["type"] == "void":
-    #             self.semantic_stack.append("void")
-    #         else:
-    #             self.semantic_stack.append(t_ret_val)
+        if backpatch:
+            callee = stack.pop()
+            store_idx = self.program_block_index
+            t_ret_val = stack.pop()
+            arg_counter = [len(l) for l in self.scanner.arg_list_stack]
+            arg_counter[-1] = stack.pop()
+            self.program_block_index = stack.pop()
+        else:
+            arg_counter = [len(l) for l in self.scanner.arg_list_stack]
+            callee = stack[-(arg_counter[-1] + 1)]
+
+        caller = self.scanner.symbol_table[self.scanner.scope_stack[-1] - 1]
+
+        if callee["lexeme"] == "output":
+            arg = stack.pop()
+            stack.pop()
+            arg_address = self.get_operand(arg)
+            self.add_code(self.get_code("assign", arg_address, self.static_base_pointer + 4))
+            self.add_code(self.get_code("PRINT", self.static_base_pointer + 4))
+            arg_counter = [len(l) for l in self.scanner.arg_list_stack]
+            arg_counter[-1] = 0
+            self.semantic_stack.append("void")
+            return
+
+        if not backpatch:
+            t_ret_val = self.get_temp()
+
+        if "frame_size" in caller:
+            top_sp = self.static_base_pointer
+            frame_size = caller["frame_size"]
+            t_new_top_sp = self.get_temp()
+            self.add_code(self.get_code("ADD", top_sp, f"#{frame_size}", t_new_top_sp), insert=backpatch)
+            self.add_code(self.get_code("assign", top_sp, f"@{t_new_top_sp}"), insert=backpatch)
+            t_args = self.get_temp()
+            self.add_code(self.get_code("ADD", t_new_top_sp, "#4", t_args), insert=backpatch)
+            n_args = callee["no.Args"]
+            args = stack[-n_args:]
+            for i in range(n_args):
+                stack.pop()
+                arg = args[i]
+                if isinstance(arg, int):
+                    arg_address = arg
+                elif "address" in arg:
+                    arg_address = arg["address"]
+                else:
+                    temp = self.get_temp()
+                    self.add_code(
+                        self.get_code("ADD", self.static_base_pointer, f"#{arg['offset']}", temp),
+                        insert=backpatch)
+                    arg_address = f"@{temp}"
+                if callee["params"][-i - 1] == "array":
+                    arg_address = f"#{arg}"  # pass by reference
+                self.add_code(self.get_code("assign", arg_address, f"@{t_args}"), insert=backpatch)
+                self.add_code(self.get_code("ADD", t_args, "#4", t_args), insert=backpatch)
+            fun_addr = stack.pop()["address"]
+            t_ret_addr = self.get_temp()
+            t_ret_val_callee = self.get_temp()
+            self.add_code(self.get_code("SUB", t_new_top_sp, "#4", t_ret_addr), insert=backpatch)
+            self.add_code(self.get_code("SUB", t_new_top_sp, "#8", t_ret_val_callee), insert=backpatch)
+            # increment stack frame pointer by frame size TODO: update stack pointer via access link and static offset
+            # self._add_three_addr_code(self._get_add_code(top_sp, f"#{frame_size}", top_sp), insert=backpatch)
+            self.add_code(self.get_code("assign", t_new_top_sp, top_sp), insert=backpatch)
+            # self._add_three_addr_code(self._get_three_addr_code("print", top_sp), insert=backpatch)
+
+            self.add_code(
+                self.get_code("assign", f"#{self.program_block_index + 2}", f"@{t_ret_addr}"),
+                insert=backpatch)
+            self.add_code(self.get_code("jp", fun_addr), insert=backpatch)
+            self.add_code(self.get_code("assign", f"@{t_ret_val_callee}", t_ret_val),
+                                      insert=backpatch)
+            self.add_code(self.get_code("SUB", top_sp, f"#{frame_size}", top_sp), insert=backpatch)
+            # self._add_three_addr_code(self._get_three_addr_code("print", top_sp), insert=backpatch)
+        else:
+            arg_counter = [len(l) for l in self.scanner.arg_list_stack]
+            callee = stack[-(arg_counter[-1] + 1)]
+            arg_counter = [len(l) for l in self.scanner.arg_list_stack]
+            self.call_seq_stack += self.semantic_stack[-(arg_counter[-1] + 1):]
+            num_offset_vars = 0
+            for i in range(1, callee["arity"] + 1):
+                arg = self.semantic_stack[-i]
+                if not isinstance(arg, int) and "offset" in arg:
+                    num_offset_vars += 1
+            arg_counter = [len(l) for l in self.scanner.arg_list_stack]
+            self.semantic_stack = self.semantic_stack[:-(arg_counter[-1] + 1)]
+            self.call_seq_stack.append(self.program_block_index)
+            arg_counter = [len(l) for l in self.scanner.arg_list_stack]
+            self.call_seq_stack.append(arg_counter[-1])
+            self.call_seq_stack.append(t_ret_val)
+            self.call_seq_stack.append(callee)
+
+            for _ in range(10 + callee["arity"] * 2 + num_offset_vars):  # reserve space for call seq
+                self.add_placeholder()
+
+        if backpatch:
+            self.program_block_index = store_idx
+        else:
+            if callee["type"] == "void":
+                self.semantic_stack.append("void")
+            else:
+                self.semantic_stack.append(t_ret_val)
 
     def sf_size(self):
-        # TODO: need some info
-        pass
-        # scope_stack, symbol_table = self._get_context_info()
-        # fun_row = SymbolTableManager.get_enclosing_fun()
-        # fun_row["args_size"] = 0
-        # fun_row["locals_size"] = 0
-        # fun_row["arrays_size"] = 0
-        # fun_row["temps_size"] = SymbolTableManager.temp_stack.pop()
-        # if not SymbolTableManager.temp_stack:
-        #     SymbolTableManager.temp_stack = [0]
-        # for i in range(scope_stack[-1], len(symbol_table)):
-        #     if symbol_table[i]["role"] == "local_var":
-        #         if symbol_table[i]["type"] == "array":
-        #             fun_row["arrays_size"] += 4 * symbol_table[i]["arity"]
-        #         fun_row["locals_size"] += 4
-        #     else:
-        #         fun_row["args_size"] += 4
-        # fun_row["frame_size"] = fun_row["args_size"] + 12
-        # # If arrays are to be implemented use this
-        # # fun_row["frame_size"] = fun_row["args_size"] + fun_row["locals_size"] \
-        # #                       + fun_row["arrays_size"] + fun_row["temps_size"] + 12
-        # fun_row["args_offset"] = 4
-        # fun_row["locals_offset"] = fun_row["args_offset"] + fun_row["args_size"]
-        # fun_row["arrays_offset"] = fun_row["locals_offset"] + fun_row["locals_size"]
-        # fun_row["temps_offset"] = fun_row["arrays_offset"] + fun_row["arrays_size"]
-        #
-        # while self.call_seq_stack:
-        #     self.call_seq_caller_routine(input_token, backpatch=True)
-        #
-        # MemoryManager.reset()
+        scope_stack, symbol_table = self.scanner.scope_stack, self.scanner.symbol_table
+        print(symbol_table)
+        fun_row = symbol_table[scope_stack[-1] - 1]
+        fun_row["args_size"] = 0
+        fun_row["locals_size"] = 0
+        fun_row["arrays_size"] = 0
+        fun_row["temps_size"] = self.stack.pop()
+        if not self.stack:
+            self.stack = [0]
+        for i in range(scope_stack[-1], len(symbol_table)):
+            if symbol_table[i]["fnuc/var"] == "local_var":
+                if symbol_table[i]["type"] == "array":
+                    fun_row["arrays_size"] += 4 * symbol_table[i]["no.Args"]
+                fun_row["locals_size"] += 4
+            else:
+                fun_row["args_size"] += 4
+        fun_row["frame_size"] = fun_row["args_size"] + 12
+        # If arrays are to be implemented use this
+        # fun_row["frame_size"] = fun_row["args_size"] + fun_row["locals_size"] \
+        #                       + fun_row["arrays_size"] + fun_row["temps_size"] + 12
+        fun_row["args_offset"] = 4
+        fun_row["locals_offset"] = fun_row["args_offset"] + fun_row["args_size"]
+        fun_row["arrays_offset"] = fun_row["locals_offset"] + fun_row["locals_size"]
+        fun_row["temps_offset"] = fun_row["arrays_offset"] + fun_row["arrays_size"]
+
+        while self.call_seq_stack:
+            self.call_seq(backpatch=True)
+
+        self.reset()
 
     def until(self):
         condition = self.semantic_stack.pop()

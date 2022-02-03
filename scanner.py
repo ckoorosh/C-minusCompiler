@@ -154,8 +154,9 @@ class Scanner:
         if token is not None:
             (token_type, lexeme) = token
             if token_type == TokenType.KEYWORD or token_type == TokenType.ID:
-                if lexeme not in self.symbol_table:
-                    self.symbol_table.append({"lexeme": lexeme, "scope": len(self.scope_stack) - 1})
+                if self.find_address(lexeme) == -1:
+                    self.symbol_table.append(
+                        {"lexeme": lexeme, "scope": len(self.scope_stack) - 1, "fnuc/var": "local_var"})
 
     def get_next_token(self):
         input_ended = False
@@ -363,3 +364,10 @@ class Scanner:
                 return token, lexeme
             else:
                 self.text = self.text[1:]
+
+    def find_address(self, lexeme):
+        for i in range(len(self.symbol_table)):
+            if self.symbol_table[i]["lexeme"] == lexeme:
+                return i
+
+        return -1
