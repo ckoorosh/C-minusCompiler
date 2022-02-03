@@ -77,7 +77,7 @@ class SemanticAnalyzer:
     def assign_type(self, input_token):
         if input_token[0].name == "ID" and self.semantic_stacks["type_assign"]:
             symbol_idx = input_token[1]
-            self.scanner.symbol_table[symbol_idx]["type"] = self.semantic_stacks["type_assign"].pop()
+            self.scanner.symbol_table[self.code_generator.find_addr(symbol_idx)]["type"] = self.semantic_stacks["type_assign"].pop()
             self.semantic_stacks["type_assign"].append(symbol_idx)
             self.scanner.declaration_flag = False
 
@@ -85,8 +85,8 @@ class SemanticAnalyzer:
         print(self.semantic_stacks["type_assign"])
         if self.semantic_stacks["type_assign"]:
             symbol_idx = self.semantic_stacks["type_assign"][-1]
-            self.scanner.symbol_table[symbol_idx]["fnuc/var"] = "function"
-            self.scanner.symbol_table[symbol_idx]["address"] = self.code_generator.program_block_index
+            self.scanner.symbol_table[self.code_generator.find_addr(symbol_idx)]["fnuc/var"] = "function"
+            self.scanner.symbol_table[self.code_generator.find_addr(symbol_idx)]["address"] = self.code_generator.program_block_index
 
     def assign_param_role(self, input_token, line_number):
         self.assign_var_role(input_token, line_number, "param")
@@ -94,7 +94,7 @@ class SemanticAnalyzer:
     def assign_var_role(self, input_token, line_number, role="local_var"):
         if self.semantic_stacks["type_assign"]:
             symbol_idx = self.semantic_stacks["type_assign"][-1]
-            symbol_row = self.scanner.symbol_table[symbol_idx]
+            symbol_row = self.scanner.symbol_table[self.code_generator.find_addr(symbol_idx)]
             symbol_row["fnuc/var"] = role
             if self.scope == 0:
                 symbol_row["fnuc/var"] = "global_var"
@@ -109,7 +109,7 @@ class SemanticAnalyzer:
     def assign_length(self, input_token):
         if self.semantic_stacks["type_assign"]:
             symbol_idx = self.semantic_stacks["type_assign"].pop()
-            symbol_row = self.scanner.symbol_table[symbol_idx]
+            symbol_row = self.scanner.symbol_table[self.code_generator.find_addr(symbol_idx)]
             if input_token[0].name == "NUM":
                 symbol_row["no.Args"] = int(input_token[1])
                 if symbol_row["fnuc/var"] == "param":
@@ -117,7 +117,7 @@ class SemanticAnalyzer:
                 else:
                     symbol_row["address"] = self.code_generator.get_static(int(input_token[1]))
             else:
-                self.scanner.symbol_table[symbol_idx]["no.Args"] = 1
+                self.scanner.symbol_table[self.code_generator.find_addr(symbol_idx)]["no.Args"] = 1
                 if symbol_row["fnuc/var"] == "param":
                     symbol_row["offset"] = self.code_generator.get_param_offset()
                 else:
@@ -146,7 +146,7 @@ class SemanticAnalyzer:
         if self.semantic_stacks["type_assign"]:
             symbol_idx = self.semantic_stacks["type_assign"].pop()
             params = self.fun_param_list
-            self.scanner.symbol_table[symbol_idx]["no.Args"] = len(params)
+            self.scanner.symbol_table[self.code_generator.find_addr(symbol_idx)]["no.Args"] = len(params)
             # self.scanner.symbol_table[symbol_idx]["params"] = params
             self.fun_param_list = []
             self.scanner.temp_stack.append(0)  # init temp counter for this function
