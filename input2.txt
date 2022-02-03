@@ -1,0 +1,7 @@
+/*===== Sample 1 =====*/
+void main(void){
+	int i;
+	int j;
+	i = 12;
+	j = 7;
+}
