@@ -75,13 +75,14 @@ class SemanticAnalyzer:
         self.semantic_stacks["type_assign"].append(input_token[1])
 
     def assign_type(self, input_token):
-        if input_token[0] == "ID" and self.semantic_stacks["type_assign"]:
+        if input_token[0].name == "ID" and self.semantic_stacks["type_assign"]:
             symbol_idx = input_token[1]
             self.scanner.symbol_table[symbol_idx]["type"] = self.semantic_stacks["type_assign"].pop()
             self.semantic_stacks["type_assign"].append(symbol_idx)
             self.scanner.declaration_flag = False
 
     def assign_fun_role(self):
+        print(self.semantic_stacks["type_assign"])
         if self.semantic_stacks["type_assign"]:
             symbol_idx = self.semantic_stacks["type_assign"][-1]
             self.scanner.symbol_table[symbol_idx]["fnuc/var"] = "function"
@@ -109,7 +110,7 @@ class SemanticAnalyzer:
         if self.semantic_stacks["type_assign"]:
             symbol_idx = self.semantic_stacks["type_assign"].pop()
             symbol_row = self.scanner.symbol_table[symbol_idx]
-            if input_token[0] == "NUM":
+            if input_token[0].name == "NUM":
                 symbol_row["no.Args"] = int(input_token[1])
                 if symbol_row["fnuc/var"] == "param":
                     symbol_row["offset"] = self.code_generator.get_param_offset()
@@ -136,7 +137,7 @@ class SemanticAnalyzer:
             self.scanner.arg_list_stack.pop()
 
     def save_arg(self, input_token):
-        if input_token[0] == "ID":
+        if input_token[0].name == "ID":
             self.scanner.arg_list_stack[-1].append(self.scanner.symbol_table[input_token[1]].get("type"))
         else:
             self.scanner.arg_list_stack[-1].append("int")
@@ -204,7 +205,7 @@ class SemanticAnalyzer:
         self.switch_counter -= 1
 
     def save_type_check(self, input_token):
-        if input_token[0] == "ID":
+        if input_token[0].name == "ID":
             operand_type = self.scanner.symbol_table[input_token[1]].get("type")
         else:
             operand_type = "int"

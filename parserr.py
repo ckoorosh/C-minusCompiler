@@ -356,7 +356,7 @@ class Parser:
                             self.add_error(f'illegal {lexeme}')
                             self.get_next_token()
                 elif edge.startswith('#S_'):  # Semantic Analyzer
-                    self.semantic(edge, self.get_current_lexeme()[1])
+                    self.semantic(edge, self.current_token)
                     break
                 elif edge.startswith('#'):  # Intermediate Code Generator
                     self.code_gen(edge, self.get_current_lexeme()[1])
@@ -420,6 +420,7 @@ class Parser:
             self.code_generator.sf_size()
 
     def semantic(self, action, token):
+        print('S', action)
         if action == '#S_in_scope':
             self.semantic_analyzer.in_scope()
         elif action == '#S_out_scope':
