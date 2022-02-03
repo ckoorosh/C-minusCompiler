@@ -74,19 +74,16 @@ class CodeGenerator:
 
     # routines
 
-
     def get_operand(self, operand):
         if isinstance(operand, int):
             address = operand
         elif "address" in operand:
-            address = operand["address"] 
+            address = operand["address"]
         else:
             temp = self.get_temp()
             self.add_code(self.get_code(self.stack_base_pointer, f"#{operand['offset']}", temp))
             address = f"@{temp}"
         return address
-
-
 
     def add_op(self):
         try:
@@ -161,16 +158,16 @@ class CodeGenerator:
 
     def find_addr(self, lexeme):
         for i in range(len(self.scanner.symbol_table)):
-            print(self.scanner.symbol_table[i], "baghali")
+            # print(self.scanner.symbol_table[i], "baghali")
             if self.scanner.symbol_table[i]["lexeme"] == lexeme:
                 return i
-           
-        #TODO error
+
+        # TODO error
         print("Errrrrrrrrrrrrrrror")
 
     def push_id(self, input_token):
         try:
-            print(self.scanner.symbol_table, "chaghaliiiii")
+            # print(self.scanner.symbol_table, "chaghaliiiii")
             id_address = self.find_addr(input_token)  # TODO: find address of input using symbol table
             self.semantic_stack.append(id_address)
         except IndexError:
@@ -195,7 +192,7 @@ class CodeGenerator:
 
     def else_(self):
         try:
-            print(self.semantic_stack)
+            # print(self.semantic_stack)
             jump_address = self.semantic_stack.pop()
             condition = self.semantic_stack.pop()
             self.add_placeholder()
@@ -229,6 +226,7 @@ class CodeGenerator:
 
     def call_seq(self, backpatch=False):
         pass
+
     #     ''' expects semantic stack to contain:
     #         ----------------------------------
     #         ss(top)         = arg_n addr

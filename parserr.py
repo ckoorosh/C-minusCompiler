@@ -167,22 +167,25 @@ class Sets:
         1: [{NonTerminals.DECLARATION: 2, NonTerminals.DECLARATION_LIST: 1},
             {'': -1}],
         2: [{NonTerminals.DECLARATION_INITIAL: 3, NonTerminals.DECLARATION_PRIME: 4}],
-        3: [{NonTerminals.TYPE_SPECIFIER: 7, 'ID': -1}],
-        4: [{NonTerminals.VAR_DECLARATION_PRIME: 5},
-            {NonTerminals.FUN_DECLARATION_PRIME: 6}],
-        5: [{';': -1},
-            {'[': -1, 'NUM': -1, ']': -1, ';': -1}],
-        6: [{'(': -1, '#S_in_scope': -1, NonTerminals.PARAMS: 8, ')': -1, NonTerminals.COMPOUND_STMT: 12,
+        3: [{'#S_save_main': -1, '#S_save_type': -1, NonTerminals.TYPE_SPECIFIER: 7, '#S_save_main2': -1,
+             '#S_assign_type': -1, 'ID': -1}],
+        4: [{'#S_assign_var_role': -1, NonTerminals.VAR_DECLARATION_PRIME: 5},
+            {'#S_assign_fun_role': -1, NonTerminals.FUN_DECLARATION_PRIME: 6}],
+        5: [{'#S_assign_length': -1, ';': -1},
+            {'[': -1, '#S_assign_length': -1, 'NUM': -1, ']': -1, ';': -1}],
+        6: [{'(': -1, '#S_in_scope': -1, '#S_save_main': -1, NonTerminals.PARAMS: 8, '#S_assign_fun_attributes': -1,
+             ')': -1, '#S_main_check': -1, NonTerminals.COMPOUND_STMT: 12,
              '#sf_size': -1, '#return_seq': -1, '#S_out_scope': -1}],
         7: [{'int': -1},
             {'void': -1}],
-        8: [{'int': -1, 'ID': -1, NonTerminals.PARAM_PRIME: 11, NonTerminals.PARAM_LIST: 9},
+        8: [{'#S_save_type': -1, '#S_save_param': -1, 'int': -1, '#S_assign_type': -1, 'ID': -1,
+             '#S_assign_param_role': -1, NonTerminals.PARAM_PRIME: 11, NonTerminals.PARAM_LIST: 9},
             {'void': -1}],
-        9: [{',': -1, NonTerminals.PARAM: 10, NonTerminals.PARAM_LIST: 9},
+        9: [{',': -1, '#S_save_param': -1, NonTerminals.PARAM: 10, NonTerminals.PARAM_LIST: 9},
             {'': -1}],
-        10: [{NonTerminals.DECLARATION_INITIAL: 3, NonTerminals.PARAM_PRIME: 11}],
-        11: [{'[': -1, ']': -1},
-             {'': -1}],
+        10: [{NonTerminals.DECLARATION_INITIAL: 3, '#S_assign_param_role': -1, NonTerminals.PARAM_PRIME: 11}],
+        11: [{'#S_assign_length': -1, '[': -1, ']': -1},
+             {'#S_assign_length': -1, '': -1}],
         12: [{'{': -1, NonTerminals.DECLARATION_LIST: 1, NonTerminals.STATEMENT_LIST: 13, '}': -1}],
         13: [{NonTerminals.STATEMENT: 14, NonTerminals.STATEMENT_LIST: 13},
              {'': -1}],
@@ -192,7 +195,7 @@ class Sets:
              {NonTerminals.ITERATION_STMT: 18},
              {NonTerminals.RETURN_STMT: 19}],
         15: [{NonTerminals.EXPRESSION: 21, '#close': -1, ';': -1},
-             {'#': -1, 'break': -1, ';': -1},
+             {'#S_check_break': -1, '#break_save': -1, 'break': -1, ';': -1},
              {';': -1}],
         16: [{'if': -1, '(': -1, NonTerminals.EXPRESSION: 21, ')': -1, '#save': -1, NonTerminals.STATEMENT: 14,
               NonTerminals.ELSE_STMT: 17}],
@@ -204,45 +207,52 @@ class Sets:
         20: [{';': -1},
              {NonTerminals.EXPRESSION: 21, ';': -1}],
         21: [{NonTerminals.SIMPLE_EXPRESSION_ZEGOND: 24},
-             {'#push_id': -1, 'ID': -1, NonTerminals.B: 22}],
-        22: [{'=': -1, NonTerminals.EXPRESSION: 21, '#assign': -1},
-             {'[': -1, NonTerminals.EXPRESSION: 21, ']': -1, NonTerminals.H: 23},
+             {'#S_check_declaration': -1, '#S_save_fun': -1, '#S_save_type_check': -1, '#push_id': -1, 'ID': -1,
+              NonTerminals.B: 22}],
+        22: [{'=': -1, NonTerminals.EXPRESSION: 21, '#S_type_check': -1, '#assign': -1},
+             {'#S_index_array': -1, '[': -1, NonTerminals.EXPRESSION: 21, ']': -1, '#S_index_array_pop': -1,
+              NonTerminals.H: 23},
              {NonTerminals.SIMPLE_EXPRESSION_PRIME: 25}],
-        23: [{'=': -1, NonTerminals.EXPRESSION: 21, '#assign': -1},
+        23: [{'=': -1, NonTerminals.EXPRESSION: 21, '#S_type_check': -1, '#assign': -1},
              {NonTerminals.G: 36, NonTerminals.D: 31, NonTerminals.C: 26}],
         24: [{NonTerminals.ADDITIVE_EXPRESSION_ZEGOND: 30, NonTerminals.C: 26}],
         25: [{NonTerminals.ADDITIVE_EXPRESSION_PRIME: 29, NonTerminals.C: 26}],
-        26: [{'#save_op': -1, NonTerminals.RELOP: 27, NonTerminals.ADDITIVE_EXPRESSION: 28, '#relop': -1},
+        26: [{'#save_op': -1, NonTerminals.RELOP: 27, NonTerminals.ADDITIVE_EXPRESSION: 28, '#S_type_check': -1,
+              '#relop': -1},
              {'': -1}],
         27: [{'<': -1},
              {'==': -1}],
         28: [{NonTerminals.TERM: 33, NonTerminals.D: 31}],
         29: [{NonTerminals.TERM_PRIME: 34, NonTerminals.D: 31}],
         30: [{NonTerminals.TERM_ZEGOND: 35, NonTerminals.D: 31}],
-        31: [{'#save_op': -1, NonTerminals.ADDOP: 32, NonTerminals.TERM: 33, '#add_op': -1, NonTerminals.D: 31},
+        31: [{'#save_op': -1, NonTerminals.ADDOP: 32, NonTerminals.TERM: 33, '#S_type_check': -1, '#add_op': -1,
+              NonTerminals.D: 31},
              {'': -1}],
         32: [{'+': -1},
              {'-': -1}],
         33: [{NonTerminals.FACTOR: 37, NonTerminals.G: 36}],
         34: [{NonTerminals.FACTOR_PRIME: 40, NonTerminals.G: 36}],
         35: [{NonTerminals.FACTOR_ZEGOND: 41, NonTerminals.G: 36}],
-        36: [{'*': -1, NonTerminals.FACTOR: 37, '#mult': -1, NonTerminals.G: 36},
+        36: [{'*': -1, NonTerminals.FACTOR: 37, '#S_type_check': -1, '#mult': -1, NonTerminals.G: 36},
              {'': -1}],
         37: [{'(': -1, NonTerminals.EXPRESSION: 21, ')': -1},
-             {'#push_id': -1, 'ID': -1, NonTerminals.VAR_CALL_PRIME: 38},
-             {'#push_const': -1, 'NUM': -1}],
-        38: [{'(': -1, NonTerminals.ARGS: 42, ')': -1, '#call_seq': -1},
+             {'#S_check_declaration': -1, '#S_save_fun': -1, '#S_save_type_check': -1, '#push_id': -1, 'ID': -1,
+              NonTerminals.VAR_CALL_PRIME: 38},
+             {'#S_save_type_check': -1, '#push_const': -1, 'NUM': -1}],
+        38: [{'#S_push_arg_stack': -1, '(': -1, NonTerminals.ARGS: 42, '#S_check_args': -1, ')': -1, '#call_seq': -1,
+              '#S_pop_arg_stack': -1},
              {NonTerminals.VAR_PRIME: 39}],
-        39: [{'[': -1, NonTerminals.EXPRESSION: 21, ']': -1},
+        39: [{'#S_index_array': -1, '[': -1, NonTerminals.EXPRESSION: 21, ']': -1, '#S_index_array_pop': -1},
              {'': -1}],
-        40: [{'(': -1, NonTerminals.ARGS: 42, ')': -1, '#call_seq': -1},
+        40: [{'#S_push_arg_stack': -1, '(': -1, NonTerminals.ARGS: 42, '#S_check_args': -1, ')': -1, '#call_seq': -1,
+              '#S_pop_arg_stack': -1},
              {'': -1}],
         41: [{'(': -1, NonTerminals.EXPRESSION: 21, ')': -1},
-             {'#push_const': -1, 'NUM': -1}],
+             {'#S_save_type_check': -1, '#push_const': -1, 'NUM': -1}],
         42: [{NonTerminals.ARG_LIST: 43},
              {'': -1}],
-        43: [{NonTerminals.EXPRESSION: 21, NonTerminals.ARG_LIST_PRIME: 44}],
-        44: [{',': -1, NonTerminals.EXPRESSION: 21, NonTerminals.ARG_LIST_PRIME: 44},
+        43: [{'#S_save_arg': -1, NonTerminals.EXPRESSION: 21, NonTerminals.ARG_LIST_PRIME: 44}],
+        44: [{',': -1, '#S_save_arg': -1, NonTerminals.EXPRESSION: 21, NonTerminals.ARG_LIST_PRIME: 44},
              {'': -1}]
     }
 
@@ -307,10 +317,10 @@ class Parser:
         return str.capitalize(str.lower(non_terminal)).replace('_', '-')
 
     def parse(self):
-        # self.code_gen('init', None)
+        self.code_gen('init', None)
         self._parse(0)
         self.code_generator.save_output()
-        # self.code_gen('finish', None)
+        self.code_gen('finish', None)
 
     def _parse(self, state, parent=None):
         if NonTerminals(state).name != "PROGRAM":
@@ -414,6 +424,8 @@ class Parser:
             self.semantic_analyzer.in_scope()
         elif action == '#S_out_scope':
             self.semantic_analyzer.out_scope()
+        elif action == '#S_save_main':
+            self.semantic_analyzer.save_main()
 
     def add_error(self, error):
         self.errors.append((self.scanner.current_line, error))
