@@ -172,12 +172,14 @@ class CodeGenerator:
             operand = self.get_operand(self.semantic_stack.pop())
             result = self.get_operand(self.semantic_stack[-1])
             self.add_code(("ASSIGN", operand, result))
+            print("ggggggggggggggggggggggggggggggggggggg", result)
         except IndexError:
             pass
 
     def push_id(self, input_token):
         scope = self.scanner.scope_stack[-1]
         id_address = self.scanner.find_address(input_token, scope)
+        print("pppppppppppp", input_token, self.scanner.symbol_table[id_address])
         self.semantic_stack.append(self.scanner.symbol_table[id_address])
 
     def push_const(self, input_token):
@@ -233,6 +235,9 @@ class CodeGenerator:
         
         stack = self.semantic_stack if not backpatch else self.call_seq_stack
 
+        print(f'stack: {stack, backpatch}')
+
+
         if backpatch:
             callee = stack.pop()
             store_idx = self.program_block_index
@@ -257,6 +262,7 @@ class CodeGenerator:
         if not backpatch:
             return_value = self.get_temp()
 
+        
         if "frame_size" in caller:
             top_sp = self.static_base_pointer
             frame_size = caller["frame_size"]
@@ -268,8 +274,9 @@ class CodeGenerator:
             n_args = callee["no.Args"]
             args = stack[-n_args:]
             for i in range(n_args):
-                stack.pop()
-                arg = args[i]
+                #stack.pop()
+                arg = callee["address"] + 4*i
+                #arg = args[i]
                 if isinstance(arg, int):
                     arg_address = arg
                 elif "address" in arg:
@@ -284,6 +291,7 @@ class CodeGenerator:
                 #     arg_address = f"#{arg}"  # pass by reference
                 self.add_code(self.get_code("assign", arg_address, f"@{t_args}"), insert=backpatch)
                 self.add_code(self.get_code("ADD", t_args, "#4", t_args), insert=backpatch)
+            stack.pop()
             fun_addr = stack.pop()["address"]
             t_ret_addr = self.get_temp()
             t_ret_val_callee = self.get_temp()
@@ -303,11 +311,10 @@ class CodeGenerator:
             self.add_code(self.get_code("SUB", top_sp, f"#{frame_size}", top_sp), insert=backpatch)
             # self._add_three_addr_code(self._get_three_addr_code("print", top_sp), insert=backpatch)
         else:
-            print(stack)
             callee = stack[-(self.arg_counter[-1] + 1)]
             self.call_seq_stack += self.semantic_stack[-(self.arg_counter[-1] + 1):]
             num_offset_vars = 0
-            for i in range(1, callee["no.Args"] + 1):
+            for i in range(1, self.arg_counter[-1] + 1):
                 arg = self.semantic_stack[-i]
                 if not isinstance(arg, int) and "offset" in arg:
                     num_offset_vars += 1
@@ -347,8 +354,7 @@ class CodeGenerator:
                 fun_row["args_size"] += 4
         fun_row["frame_size"] = fun_row["args_size"] + 12
         # If arrays are to be implemented use this
-        # fun_row["frame_size"] = fun_row["args_size"] + fun_row["locals_size"] \
-        #                       + fun_row["arrays_size"] + fun_row["temps_size"] + 12
+        fun_row["frame_size"] = fun_row["args_size"] + fun_row["locals_size"]               + fun_row["arrays_size"] + fun_row["temps_size"] + 12
         fun_row["args_offset"] = 4
         fun_row["locals_offset"] = fun_row["args_offset"] + fun_row["args_size"]
         fun_row["arrays_offset"] = fun_row["locals_offset"] + fun_row["locals_size"]

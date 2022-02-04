@@ -111,8 +111,6 @@ class SemanticAnalyzer:
         scope = self.get_scope()
         if self.semantic_stacks["type_assign"]:
             symbol_idx = self.semantic_stacks["type_assign"].pop()
-            print(self.scanner.scope_stack)
-            print(self.scanner.symbol_table)
             symbol_row = self.scanner.symbol_table[self.scanner.find_address(symbol_idx, scope)]
             if input_token[0].name == "NUM":
                 symbol_row["no.Args"] = int(input_token[1])
@@ -127,7 +125,8 @@ class SemanticAnalyzer:
                     symbol_row["offset"] = self.code_generator.get_param_offset()
                 else:
                     symbol_row["address"] = self.code_generator.get_static()
-
+            for i in range(symbol_row["no.Args"]):
+                self.code_generator.add_code(self.code_generator.get_code("ASSIGN", "#0", symbol_row["address"]+4*i))
             if input_token[1] == "[" and self.fun_param_list:
                 self.fun_param_list[-1] = "array"
 
