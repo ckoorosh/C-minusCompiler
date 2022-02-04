@@ -1,4 +1,5 @@
 import os
+from select import select
 
 script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -43,8 +44,9 @@ class SemanticAnalyzer:
         return len(self.scanner.scope_stack) - 1
 
     def get_lexeme(self, token):
+        scope = self.get_scope()
         if token[0].name == "ID":
-            return self.scanner.symbol_table[self.scanner.find_address(token[1])]['lexeme']
+            return self.scanner.symbol_table[self.scanner.find_address(token[1], scope)]['lexeme']
         else:
             return token[1]
 
@@ -70,27 +72,30 @@ class SemanticAnalyzer:
         self.semantic_stacks["type_assign"].append(input_token[1])
 
     def assign_type(self, input_token):
+        scope = self.get_scope()
         if input_token[0].name == "ID" and self.semantic_stacks["type_assign"]:
             symbol_idx = input_token[1]
-            self.scanner.symbol_table[self.scanner.find_address(symbol_idx)]["type"] = \
+            self.scanner.symbol_table[self.scanner.find_address(symbol_idx, scope)]["type"] = \
                 self.semantic_stacks["type_assign"].pop()
             self.semantic_stacks["type_assign"].append(symbol_idx)
             self.scanner.declaration_flag = False
 
     def assign_fun_role(self):
+        scope = self.get_scope()
         if self.semantic_stacks["type_assign"]:
             symbol_idx = self.semantic_stacks["type_assign"][-1]
-            self.scanner.symbol_table[self.scanner.find_address(symbol_idx)]["fnuc/var"] = "function"
-            self.scanner.symbol_table[self.scanner.find_address(symbol_idx)][
+            self.scanner.symbol_table[self.scanner.find_address(symbol_idx, scope)]["fnuc/var"] = "function"
+            self.scanner.symbol_table[self.scanner.find_address(symbol_idx, scope)][
                 "address"] = self.code_generator.program_block_index
 
     def assign_param_role(self, input_token, line_number):
         self.assign_var_role(input_token, line_number, "param")
 
     def assign_var_role(self, input_token, line_number, role="local_var"):
+        scope = self.get_scope()
         if self.semantic_stacks["type_assign"]:
             symbol_idx = self.semantic_stacks["type_assign"][-1]
-            symbol_row = self.scanner.symbol_table[self.scanner.find_address(symbol_idx)]
+            symbol_row = self.scanner.symbol_table[self.scanner.find_address(symbol_idx, scope)]
             symbol_row["fnuc/var"] = role
             if self.scope == 0:
                 symbol_row["fnuc/var"] = "global_var"
@@ -103,9 +108,12 @@ class SemanticAnalyzer:
                 symbol_row["type"] = "array"
 
     def assign_length(self, input_token):
+        scope = self.get_scope()
         if self.semantic_stacks["type_assign"]:
             symbol_idx = self.semantic_stacks["type_assign"].pop()
-            symbol_row = self.scanner.symbol_table[self.scanner.find_address(symbol_idx)]
+            print(self.scanner.scope_stack)
+            print(self.scanner.symbol_table)
+            symbol_row = self.scanner.symbol_table[self.scanner.find_address(symbol_idx, scope)]
             if input_token[0].name == "NUM":
                 symbol_row["no.Args"] = int(input_token[1])
                 if symbol_row["fnuc/var"] == "param":
@@ -113,7 +121,7 @@ class SemanticAnalyzer:
                 else:
                     symbol_row["address"] = self.code_generator.get_static(int(input_token[1]))
             else:
-                self.scanner.symbol_table[self.scanner.find_address(symbol_idx)][
+                self.scanner.symbol_table[self.scanner.find_address(symbol_idx, scope)][
                     "no.Args"] = 1
                 if symbol_row["fnuc/var"] == "param":
                     symbol_row["offset"] = self.code_generator.get_param_offset()
@@ -134,17 +142,19 @@ class SemanticAnalyzer:
             self.scanner.arg_list_stack.pop()
 
     def save_arg(self, input_token):
+        scope = self.get_scope()
         if input_token[0].name == "ID":
             self.scanner.arg_list_stack[-1].append(
-                self.scanner.symbol_table[self.scanner.find_address(input_token[1])].get("type"))
+                self.scanner.symbol_table[self.scanner.find_address(input_token[1], scope)].get("type"))
         else:
             self.scanner.arg_list_stack[-1].append("int")
 
     def assign_fun_attrs(self):
+        scope = self.get_scope()
         if self.semantic_stacks["type_assign"]:
             symbol_idx = self.semantic_stacks["type_assign"].pop()
             params = self.fun_param_list
-            self.scanner.symbol_table[self.scanner.find_address(symbol_idx)][
+            self.scanner.symbol_table[self.scanner.find_address(symbol_idx, scope)][
                 "no.Args"] = len(params)
             # self.scanner.symbol_table[symbol_idx]["params"] = params
             self.fun_param_list = []
@@ -165,23 +175,26 @@ class SemanticAnalyzer:
             pass
 
     def check_declaration(self, input_token, line_number):
-        if "type" not in self.scanner.symbol_table[self.scanner.find_address(input_token[1])]:
+        scope = self.get_scope()
+        if "type" not in self.scanner.symbol_table[self.scanner.find_address(input_token[1], scope)]:
             lexeme = self.get_lexeme(input_token)
             self.scanner.error_flag = True
             self.semantic_errors.append((line_number, f"'{lexeme}' is not defined."))
 
     def save_fun(self, input_token):
-        if self.scanner.symbol_table[self.scanner.find_address(input_token[1])].get("fnuc/var") == "function":
+        scope = self.get_scope()
+        if self.scanner.symbol_table[self.scanner.find_address(input_token[1], scope)].get("fnuc/var") == "function":
             self.semantic_stacks["fun_check"].append(input_token[1])
 
     def check_args(self, line_number):
+        scope = self.get_scope()
         if self.semantic_stacks["fun_check"]:
             fun_id = self.semantic_stacks["fun_check"].pop()
-            lexeme = self.scanner.symbol_table[self.scanner.find_address(fun_id)]["lexeme"]
+            lexeme = self.scanner.symbol_table[self.scanner.find_address(fun_id, scope)]["lexeme"]
             args = self.scanner.arg_list_stack[-1]
             if args is not None:
                 self.semantic_stacks["type_check"] = self.semantic_stacks["type_check"][:len(args)]
-                if self.scanner.symbol_table[self.scanner.find_address(fun_id)]["no.Args"] != len(args):
+                if self.scanner.symbol_table[self.scanner.find_address(fun_id, scope)]["no.Args"] != len(args):
                     self.scanner.error_flag = True
                     self.semantic_errors.append((line_number, f"Mismatch in numbers of arguments of '{lexeme}'."))
                 else:
@@ -204,9 +217,10 @@ class SemanticAnalyzer:
         self.switch_counter -= 1
 
     def save_type_check(self, input_token):
+        scope = self.get_scope()
         if input_token[0].name == "ID":
             operand_type = self.scanner.symbol_table[
-                self.scanner.find_address(input_token[1])].get("type")
+                self.scanner.find_address(input_token[1], scope)].get("type")
         else:
             operand_type = "int"
         self.semantic_stacks["type_check"].append(operand_type)
@@ -236,3 +250,6 @@ class SemanticAnalyzer:
                     self.semantic_stacks["type_check"].append(operand_a_type)
         except IndexError:
             pass
+
+    def get_scope(self):
+        return self.scanner.scope_stack[-1]
