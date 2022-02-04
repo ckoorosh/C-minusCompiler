@@ -443,7 +443,7 @@ class Parser:
         elif action == '#S_assign_length':
             self.semantic_analyzer.assign_length(token)
         elif action == '#S_assign_fun_attributes':
-            self.semantic_analyzer.assign_length(token)
+            self.semantic_analyzer.assign_fun_attrs()
         elif action == '#S_save_param':
             self.semantic_analyzer.save_param(token)
         elif action == '#S_assign_param_role':
