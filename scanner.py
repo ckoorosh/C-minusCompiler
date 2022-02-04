@@ -150,10 +150,11 @@ class Scanner:
         self.tokens[self.current_line].append((token_type.name, lexeme))
 
     def add_to_symbol_table(self, token):
+        scope = self.scope_stack[-1]
         if token is not None:
             (token_type, lexeme) = token
             if token_type == TokenType.KEYWORD or token_type == TokenType.ID:
-                if self.find_address(lexeme) == -1:
+                if self.find_address(lexeme, scope) == -1:
                     self.symbol_table.append(
                         {"lexeme": lexeme, "scope": len(self.scope_stack) - 1, "fnuc/var": "local_var"})
 
@@ -364,9 +365,9 @@ class Scanner:
             else:
                 self.text = self.text[1:]
 
-    def find_address(self, lexeme):
+    def find_address(self, lexeme, scope):
         for i in range(len(self.symbol_table)):
-            if self.symbol_table[i]["lexeme"] == lexeme:
+            if self.symbol_table[i]["lexeme"] == lexeme and i >= scope:
                 return i
 
         return -1
