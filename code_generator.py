@@ -266,7 +266,7 @@ class CodeGenerator:
             n_args = callee["no.Args"]
             args = stack[-n_args:]
             for i in range(n_args):
-                stack.pop()
+                #stack.pop()
                 arg = args[i]
                 if isinstance(arg, int):
                     arg_address = arg
@@ -307,7 +307,11 @@ class CodeGenerator:
             self.call_seq_stack += self.semantic_stack[-(arg_counter[-1] + 1):]
             num_offset_vars = 0
             for i in range(1, callee["no.Args"] + 1):
-                arg = self.semantic_stack[-i]
+                print("aaa ", callee, callee["no.Args"], callee["address"], self.semantic_stack)
+                
+                #arg = self.semantic_stack[-i]
+
+                arg = callee["address"] + i*4
                 if not isinstance(arg, int) and "offset" in arg:
                     num_offset_vars += 1
             arg_counter = [len(l) for l in self.scanner.arg_list_stack]
