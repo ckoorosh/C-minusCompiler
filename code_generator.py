@@ -91,7 +91,8 @@ class CodeGenerator:
             address = operand["address"]
         else:
             temp = self.get_temp()
-            self.add_code(self.get_code("ADD", self.stack_base_pointer, f"#{operand['offset']}", temp))
+            print(temp, '...........', self.program_block_index)
+            self.add_code(self.get_code("ADD", self.static_base_pointer, f"#{operand['offset']}", temp))
             address = f"@{temp}"
         return address
 
