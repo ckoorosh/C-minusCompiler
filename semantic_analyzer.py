@@ -148,7 +148,7 @@ class SemanticAnalyzer:
                 "no.Args"] = len(params)
             # self.scanner.symbol_table[symbol_idx]["params"] = params
             self.fun_param_list = []
-            self.scanner.temp_stack.append(0)
+            self.code_generator.stack.append(0)
 
     def check_main(self):
         main_signature = ("void", "main", "void")
@@ -171,8 +171,7 @@ class SemanticAnalyzer:
             self.semantic_errors.append((line_number, f"'{lexeme}' is not defined."))
 
     def save_fun(self, input_token):
-        if self.scanner.symbol_table[self.scanner.find_address(input_token[1])].get(
-                "fnuc/var") == "function":
+        if self.scanner.symbol_table[self.scanner.find_address(input_token[1])].get("fnuc/var") == "function":
             self.semantic_stacks["fun_check"].append(input_token[1])
 
     def check_args(self, line_number):
@@ -228,11 +227,11 @@ class SemanticAnalyzer:
                 if operand_a_type == "array":
                     self.scanner.error_flag = True
                     self.semantic_errors.append((line_number,
-                                                  f"Type mismatch in operands, Got '{operand_a_type}' instead of 'int'."))
+                                                 f"Type mismatch in operands, Got '{operand_a_type}' instead of 'int'."))
                 elif operand_a_type != operand_b_type:
                     self.scanner.error_flag = True
                     self.semantic_errors.append((line_number,
-                                                  f"Type mismatch in operands, Got '{operand_b_type}' instead of '{operand_a_type}'."))
+                                                 f"Type mismatch in operands, Got '{operand_b_type}' instead of '{operand_a_type}'."))
                 else:
                     self.semantic_stacks["type_check"].append(operand_a_type)
         except IndexError:

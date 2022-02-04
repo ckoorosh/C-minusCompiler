@@ -71,7 +71,6 @@ class Scanner:
         self.declaration_flag = False
         self.error_flag = False
         self.arg_list_stack = []
-        self.temp_stack = []
         self.read_text()
         self.init_symbol_table()
 
