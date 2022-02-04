@@ -75,7 +75,7 @@ class CodeGenerator:
         self.program_block[1] = (1, self.get_code("SUB", self.static_base_pointer, "#4", return_address))
         self.program_block[2] = (2, self.get_code("assign", f"#{self.program_block_index}", f"@{return_address}"))
         self.program_block[3] = (
-            3, self.get_code("jp", self.scanner.symbol_table[self.scanner.find_address("main")]["address"]))
+            3, self.get_code("jp", self.scanner.symbol_table[self.scanner.find_address("main", 0)]["address"]))
 
     def save_output(self):
         codes = ''
@@ -176,7 +176,8 @@ class CodeGenerator:
             pass
 
     def push_id(self, input_token):
-        id_address = self.scanner.find_address(input_token)
+        scope = self.scanner.scope_stack[-1]
+        id_address = self.scanner.find_address(input_token, scope)
         self.semantic_stack.append(self.scanner.symbol_table[id_address])
 
     def push_const(self, input_token):
@@ -242,8 +243,6 @@ class CodeGenerator:
 
         caller = self.scanner.symbol_table[self.scanner.scope_stack[-1] - 1]
 
-        print(callee)
-
         if callee["lexeme"] == "output":
             arg = stack.pop()
             stack.pop()
@@ -303,12 +302,12 @@ class CodeGenerator:
             self.add_code(self.get_code("SUB", top_sp, f"#{frame_size}", top_sp), insert=backpatch)
             # self._add_three_addr_code(self._get_three_addr_code("print", top_sp), insert=backpatch)
         else:
+            print(stack)
             callee = stack[-(self.arg_counter[-1] + 1)]
             self.call_seq_stack += self.semantic_stack[-(self.arg_counter[-1] + 1):]
             num_offset_vars = 0
             for i in range(1, callee["no.Args"] + 1):
                 arg = self.semantic_stack[-i]
-                print(arg)
                 if not isinstance(arg, int) and "offset" in arg:
                     num_offset_vars += 1
             self.semantic_stack = self.semantic_stack[:-(self.arg_counter[-1] + 1)]
@@ -357,6 +356,12 @@ class CodeGenerator:
             self.call_seq(backpatch=True)
 
         self.reset()
+
+    def call_call(self):
+        arg = self.semantic_stack[-2]
+        for i in range(arg['no.Args'] + 1):
+            self.semantic_stack.append(arg['address'] + i * 4)
+        print(self.semantic_stack)
 
     def until(self):
         condition = self.semantic_stack.pop()
