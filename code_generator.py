@@ -231,7 +231,7 @@ class CodeGenerator:
         if backpatch:
             callee = stack.pop()
             store_idx = self.program_block_index
-            t_ret_val = stack.pop()
+            return_value = stack.pop()
             arg_counter = [len(l) for l in self.scanner.arg_list_stack]
             arg_counter[-1] = stack.pop()
             self.program_block_index = stack.pop()
@@ -253,7 +253,7 @@ class CodeGenerator:
             return
 
         if not backpatch:
-            t_ret_val = self.get_temp()
+            return_value = self.get_temp()
 
         if "frame_size" in caller:
             top_sp = self.static_base_pointer
@@ -296,7 +296,7 @@ class CodeGenerator:
                 self.get_code("assign", f"#{self.program_block_index + 2}", f"@{t_ret_addr}"),
                 insert=backpatch)
             self.add_code(self.get_code("jp", fun_addr), insert=backpatch)
-            self.add_code(self.get_code("assign", f"@{t_ret_val_callee}", t_ret_val),
+            self.add_code(self.get_code("assign", f"@{t_ret_val_callee}", return_value),
                           insert=backpatch)
             self.add_code(self.get_code("SUB", top_sp, f"#{frame_size}", top_sp), insert=backpatch)
             # self._add_three_addr_code(self._get_three_addr_code("print", top_sp), insert=backpatch)
@@ -315,7 +315,7 @@ class CodeGenerator:
             self.call_seq_stack.append(self.program_block_index)
             arg_counter = [len(l) for l in self.scanner.arg_list_stack]
             self.call_seq_stack.append(arg_counter[-1])
-            self.call_seq_stack.append(t_ret_val)
+            self.call_seq_stack.append(return_value)
             self.call_seq_stack.append(callee)
 
             for _ in range(10 + callee["no.Args"] * 2 + num_offset_vars):  # reserve space for call seq
@@ -327,7 +327,7 @@ class CodeGenerator:
             if callee["type"] == "void":
                 self.semantic_stack.append("void")
             else:
-                self.semantic_stack.append(t_ret_val)
+                self.semantic_stack.append(return_value)
 
     def sf_size(self):
         scope_stack, symbol_table = self.scanner.scope_stack, self.scanner.symbol_table

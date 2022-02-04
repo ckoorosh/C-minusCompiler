@@ -27,7 +27,7 @@ class SemanticAnalyzer:
         # lists
         self.fun_param_list = []
         self.fun_arg_list = []
-        self._semantic_errors = []
+        self.semantic_errors = []
 
         self.semantic_error_file = os.path.join(script_dir, "errors", "semantic_errors.txt")
 
@@ -42,16 +42,6 @@ class SemanticAnalyzer:
     def scope(self):
         return len(self.scanner.scope_stack) - 1
 
-    @property
-    def semantic_errors(self):
-        semantic_errors = []
-        if self._semantic_errors:
-            for lineno, error in self._semantic_errors:
-                semantic_errors.append(f"#{lineno} : Semantic Error! {error}\n")
-        else:
-            semantic_errors.append("The input program is semantically correct.\n")
-        return "".join(semantic_errors)
-
     def get_lexeme(self, token):
         if token[0].name == "ID":
             return self.scanner.symbol_table[self.scanner.find_address(token[1])]['lexeme']
@@ -59,8 +49,15 @@ class SemanticAnalyzer:
             return token[1]
 
     def save_semantic_errors(self):
+        errors = []
+        if self.semantic_errors:
+            for line_number, error in self.semantic_errors:
+                errors.append(f"#{line_number} : Semantic Error! {error}\n")
+        else:
+            errors.append("The input program is semantically correct.\n")
+        errors = "".join(errors)
         with open(self.semantic_error_file, "w") as f:
-            f.write(self.semantic_errors)
+            f.write(errors)
 
     def save_main(self, input_token):
         self.semantic_stacks["main_check"].append(self.get_lexeme(input_token))
@@ -99,9 +96,9 @@ class SemanticAnalyzer:
                 symbol_row["fnuc/var"] = "global_var"
             if symbol_row["type"] == "void":
                 self.scanner.error_flag = True
-                self._semantic_errors.append(
+                self.semantic_errors.append(
                     (line_number, "Illegal type of void for '{}'.".format(symbol_row["lexeme"])))
-                symbol_row.pop("type")  # void types are not considered to be defined
+                symbol_row.pop("type")
             if input_token[1] == "[":
                 symbol_row["type"] = "array"
 
@@ -151,7 +148,7 @@ class SemanticAnalyzer:
                 "no.Args"] = len(params)
             # self.scanner.symbol_table[symbol_idx]["params"] = params
             self.fun_param_list = []
-            self.scanner.temp_stack.append(0)  # init temp counter for this function
+            self.scanner.temp_stack.append(0)
 
     def check_main(self):
         main_signature = ("void", "main", "void")
@@ -161,7 +158,6 @@ class SemanticAnalyzer:
 
             if not self.main_found:
                 self.main_found = (top_three == main_signature and self.scope == 1)
-            # check whether main is the last global function definition 
             elif not self.main_not_last and self.main_found and self.scope == 1:
                 self.main_not_last = True
 
@@ -172,7 +168,7 @@ class SemanticAnalyzer:
         if "type" not in self.scanner.symbol_table[self.scanner.find_address(input_token[1])]:
             lexeme = self.get_lexeme(input_token)
             self.scanner.error_flag = True
-            self._semantic_errors.append((line_number, f"'{lexeme}' is not defined."))
+            self.semantic_errors.append((line_number, f"'{lexeme}' is not defined."))
 
     def save_fun(self, input_token):
         if self.scanner.symbol_table[self.scanner.find_address(input_token[1])].get(
@@ -188,7 +184,7 @@ class SemanticAnalyzer:
                 self.semantic_stacks["type_check"] = self.semantic_stacks["type_check"][:len(args)]
                 if self.scanner.symbol_table[self.scanner.find_address(fun_id)]["no.Args"] != len(args):
                     self.scanner.error_flag = True
-                    self._semantic_errors.append((line_number, f"Mismatch in numbers of arguments of '{lexeme}'."))
+                    self.semantic_errors.append((line_number, f"Mismatch in numbers of arguments of '{lexeme}'."))
                 else:
                     pass
                     # params = self.scanner.symbol_table[self.scanner.find_address(fun_id)]["params"]
@@ -200,10 +196,10 @@ class SemanticAnalyzer:
                     #                                       f"Mismatch in type of argument {i} of '{lexeme}'. Expected '{param}' but got '{arg}' instead."))
                     #     i += 1
 
-    def check_break(self, line_number):
+    def check_break(self, line_number):  # TODO
         if self.while_counter <= 0 and self.switch_counter <= 0:
             self.scanner.error_flag = True
-            self._semantic_errors.append((line_number, "No 'while' or 'switch' found for 'break'."))
+            self.semantic_errors.append((line_number, "No 'repeat ... until' found for 'break'."))
 
     def pop_switch(self):
         self.switch_counter -= 1
@@ -231,26 +227,13 @@ class SemanticAnalyzer:
             if operand_b_type is not None and operand_a_type is not None:
                 if operand_a_type == "array":
                     self.scanner.error_flag = True
-                    self._semantic_errors.append((line_number,
+                    self.semantic_errors.append((line_number,
                                                   f"Type mismatch in operands, Got '{operand_a_type}' instead of 'int'."))
                 elif operand_a_type != operand_b_type:
                     self.scanner.error_flag = True
-                    self._semantic_errors.append((line_number,
+                    self.semantic_errors.append((line_number,
                                                   f"Type mismatch in operands, Got '{operand_b_type}' instead of '{operand_a_type}'."))
                 else:
                     self.semantic_stacks["type_check"].append(operand_a_type)
         except IndexError:
             pass
-
-    ''' semantic routines end here '''
-
-    def semantic_check(self, action_symbol, input_token, line_number):
-        try:
-            self.semantic_checks[action_symbol](input_token, line_number)
-        except Exception as e:
-            print(f"{line_number} : Error in semantic routine {action_symbol}:", str(e))
-
-    def eof_check(self, line_number):
-        if not self.main_found or self.main_not_last:
-            self.scanner.error_flag = True
-            self._semantic_errors.append((line_number, "main function not found!"))
