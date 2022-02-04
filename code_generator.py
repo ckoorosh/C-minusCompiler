@@ -282,7 +282,7 @@ class CodeGenerator:
                 #     arg_address = f"#{arg}"  # pass by reference
                 self.add_code(self.get_code("assign", arg_address, f"@{t_args}"), insert=backpatch)
                 self.add_code(self.get_code("ADD", t_args, "#4", t_args), insert=backpatch)
-            fun_addr = stack.pop()["address"]
+            fun_addr = stack.pop()
             t_ret_addr = self.get_temp()
             t_ret_val_callee = self.get_temp()
             self.add_code(self.get_code("SUB", t_new_top_sp, "#4", t_ret_addr), insert=backpatch)
