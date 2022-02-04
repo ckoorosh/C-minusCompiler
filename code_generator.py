@@ -17,6 +17,10 @@ class CodeGenerator:
         self.array_field_offset = 0
         self.temp_field_offset = 0
 
+    @property
+    def arg_counter(self):
+        return [len(l) for l in self.scanner.arg_list_stack]
+
     def reset(self):
         self.args_field_offset = 4
         self.locals_field_offset = 0
@@ -231,14 +235,14 @@ class CodeGenerator:
             callee = stack.pop()
             store_idx = self.program_block_index
             return_value = stack.pop()
-            arg_counter = [len(l) for l in self.scanner.arg_list_stack]
-            arg_counter[-1] = stack.pop()
+            self.arg_counter[-1] = stack.pop()
             self.program_block_index = stack.pop()
         else:
-            arg_counter = [len(l) for l in self.scanner.arg_list_stack]
-            callee = stack[-(arg_counter[-1] + 1)]
+            callee = stack[-(self.arg_counter[-1] + 1)]
 
         caller = self.scanner.symbol_table[self.scanner.scope_stack[-1] - 1]
+
+        print(callee)
 
         if callee["lexeme"] == "output":
             arg = stack.pop()
@@ -246,8 +250,7 @@ class CodeGenerator:
             arg_address = self.get_operand(arg)
             self.add_code(self.get_code("assign", arg_address, self.static_base_pointer + 4))
             self.add_code(self.get_code("PRINT", self.static_base_pointer + 4))
-            arg_counter = [len(l) for l in self.scanner.arg_list_stack]
-            arg_counter[-1] = 0
+            self.arg_counter[-1] = 0
             self.semantic_stack.append("void")
             return
 
@@ -300,24 +303,21 @@ class CodeGenerator:
             self.add_code(self.get_code("SUB", top_sp, f"#{frame_size}", top_sp), insert=backpatch)
             # self._add_three_addr_code(self._get_three_addr_code("print", top_sp), insert=backpatch)
         else:
-            arg_counter = [len(l) for l in self.scanner.arg_list_stack]
-            callee = stack[-(arg_counter[-1] + 1)]
-            arg_counter = [len(l) for l in self.scanner.arg_list_stack]
-            self.call_seq_stack += self.semantic_stack[-(arg_counter[-1] + 1):]
+            callee = stack[-(self.arg_counter[-1] + 1)]
+            self.call_seq_stack += self.semantic_stack[-(self.arg_counter[-1] + 1):]
             num_offset_vars = 0
             for i in range(1, callee["no.Args"] + 1):
                 arg = self.semantic_stack[-i]
+                print(arg)
                 if not isinstance(arg, int) and "offset" in arg:
                     num_offset_vars += 1
-            arg_counter = [len(l) for l in self.scanner.arg_list_stack]
-            self.semantic_stack = self.semantic_stack[:-(arg_counter[-1] + 1)]
+            self.semantic_stack = self.semantic_stack[:-(self.arg_counter[-1] + 1)]
             self.call_seq_stack.append(self.program_block_index)
-            arg_counter = [len(l) for l in self.scanner.arg_list_stack]
-            self.call_seq_stack.append(arg_counter[-1])
+            self.call_seq_stack.append(self.arg_counter[-1])
             self.call_seq_stack.append(return_value)
             self.call_seq_stack.append(callee)
 
-            for _ in range(10 + callee["no.Args"] * 2 + num_offset_vars):  # reserve space for call seq
+            for _ in range(10 + callee["no.Args"] * 2 + num_offset_vars):
                 self.add_reserved()
 
         if backpatch:

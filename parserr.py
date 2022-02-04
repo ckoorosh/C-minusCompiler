@@ -328,6 +328,7 @@ class Parser:
 
     def _parse(self, state, parent=None):
         if NonTerminals(state).name != "PROGRAM":
+            # print(NonTerminals(state).name, parent.name)
             node = Node(self.get_non_terminal_name(NonTerminals(state).name), parent=parent)
         else:
             node = Node(self.get_non_terminal_name(NonTerminals(state).name))
