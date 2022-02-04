@@ -71,7 +71,7 @@ class CodeGenerator:
         self.program_block[1] = (1, self.get_code("SUB", self.static_base_pointer, "#4", return_address))
         self.program_block[2] = (2, self.get_code("assign", f"#{self.program_block_index}", f"@{return_address}"))
         self.program_block[3] = (
-            3, self.get_code("jp", self.scanner.symbol_table[self.scanner.find_address("main")]["address"]))
+            3, self.get_code("jp", self.scanner.symbol_table[self.scanner.find_address("main", 0)]["address"]))
 
     def save_output(self):
         codes = ''
@@ -172,7 +172,8 @@ class CodeGenerator:
             pass
 
     def push_id(self, input_token):
-        id_address = self.scanner.find_address(input_token)
+        scope = self.scanner.scope_stack[-1]
+        id_address = self.scanner.find_address(input_token, scope)
         self.semantic_stack.append(self.scanner.symbol_table[id_address])
 
     def push_const(self, input_token):
@@ -225,6 +226,7 @@ class CodeGenerator:
         self.add_code(self.get_code("jp", f"@{temp}"))
 
     def call_seq(self, backpatch=False):
+        
         stack = self.semantic_stack if not backpatch else self.call_seq_stack
 
         if backpatch:
@@ -305,9 +307,10 @@ class CodeGenerator:
             callee = stack[-(arg_counter[-1] + 1)]
             arg_counter = [len(l) for l in self.scanner.arg_list_stack]
             self.call_seq_stack += self.semantic_stack[-(arg_counter[-1] + 1):]
+            print("aaa ", self.semantic_stack[-(arg_counter[-1] + 1):])
             num_offset_vars = 0
             for i in range(1, callee["no.Args"] + 1):
-                print("aaa ", callee, callee["no.Args"], callee["address"], self.semantic_stack)
+                
                 
                 #arg = self.semantic_stack[-i]
 
@@ -336,6 +339,7 @@ class CodeGenerator:
     def sf_size(self):
         scope_stack, symbol_table = self.scanner.scope_stack, self.scanner.symbol_table
         fun_row = symbol_table[scope_stack[-1] - 1]
+
         fun_row["args_size"] = 0
         fun_row["locals_size"] = 0
         fun_row["arrays_size"] = 0
@@ -344,7 +348,7 @@ class CodeGenerator:
             self.stack = [0]
         for i in range(scope_stack[-1], len(symbol_table)):
             if symbol_table[i]["fnuc/var"] == "local_var":
-                if symbol_table[i]["type"] == "array":
+                if "type" in symbol_table[i].keys() and symbol_table[i]["type"] == "array":
                     fun_row["arrays_size"] += 4 * symbol_table[i]["no.Args"]
                 fun_row["locals_size"] += 4
             else:
