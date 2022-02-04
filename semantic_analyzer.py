@@ -53,16 +53,14 @@ class SemanticAnalyzer:
         return "".join(semantic_errors)
 
     def get_lexeme(self, token):
-        if token[0] == "ID":
-            return self.scanner.symbol_table[token[1]]['lexeme']
+        if token[0].name == "ID":
+            return self.scanner.symbol_table[self.scanner.find_address(token[1])]['lexeme']
         else:
             return token[1]
 
     def save_semantic_errors(self):
         with open(self.semantic_error_file, "w") as f:
             f.write(self.semantic_errors)
-
-    ''' semantic routines start here '''
 
     def save_main(self, input_token):
         self.semantic_stacks["main_check"].append(self.get_lexeme(input_token))
@@ -85,8 +83,7 @@ class SemanticAnalyzer:
     def assign_fun_role(self):
         if self.semantic_stacks["type_assign"]:
             symbol_idx = self.semantic_stacks["type_assign"][-1]
-            self.scanner.symbol_table[self.scanner.find_address(symbol_idx)][
-                "fnuc/var"] = "function"
+            self.scanner.symbol_table[self.scanner.find_address(symbol_idx)]["fnuc/var"] = "function"
             self.scanner.symbol_table[self.scanner.find_address(symbol_idx)][
                 "address"] = self.code_generator.program_block_index
 

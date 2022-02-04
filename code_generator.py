@@ -56,16 +56,15 @@ class CodeGenerator:
         if increment:
             self.program_block_index += 1
 
-    def add_placeholder(self):
-        print('Placeholder', len(self.program_block))
-        self.add_code('Placeholder')
+    def add_reserved(self):
+        self.add_code('Reserved')
 
     def init_program(self):
         code = self.get_code("assign", f'#{self.stack_base_pointer}', self.static_base_pointer)
         self.add_code(code)
         self.static_offset += 8
         for _ in range(3):
-            self.add_placeholder()
+            self.add_reserved()
 
     def finish_program(self):
         return_address = self.get_temp()
@@ -138,13 +137,13 @@ class CodeGenerator:
         try:
             save_address = self.program_block_index
             self.semantic_stack.append(save_address)
-            self.add_placeholder()
+            self.add_reserved()
         except IndexError:
             pass
 
     def break_save(self):
         self.break_stack[-1].append(self.program_block_index)
-        self.add_placeholder()
+        self.add_reserved()
 
     def label(self):
         try:
@@ -197,7 +196,7 @@ class CodeGenerator:
             jump_address = self.semantic_stack.pop()
             condition = self.get_operand(self.semantic_stack.pop())
             self.semantic_stack.append(self.program_block_index)
-            self.add_placeholder()
+            self.add_reserved()
             self.add_code(("jpf", condition, self.program_block_index), jump_address, True, False)
         except IndexError:
             pass
@@ -319,7 +318,7 @@ class CodeGenerator:
             self.call_seq_stack.append(callee)
 
             for _ in range(10 + callee["no.Args"] * 2 + num_offset_vars):  # reserve space for call seq
-                self.add_placeholder()
+                self.add_reserved()
 
         if backpatch:
             self.program_block_index = store_idx
@@ -362,7 +361,7 @@ class CodeGenerator:
     def until(self):
         condition = self.semantic_stack.pop()
         jp_address = self.semantic_stack.pop()
-        self.add_placeholder()
+        self.add_reserved()
         self.add_code(("jpf", condition, self.program_block_index), jp_address, True, False)
         self.semantic_stack.append(self.program_block_index)
         pass
