@@ -91,7 +91,6 @@ class CodeGenerator:
             address = operand["address"]
         else:
             temp = self.get_temp()
-            print(temp, '...........', self.program_block_index)
             self.add_code(self.get_code("ADD", self.static_base_pointer, f"#{operand['offset']}", temp))
             address = f"@{temp}"
         return address
@@ -210,7 +209,7 @@ class CodeGenerator:
         result = self.get_temp()
         self.add_code(self.get_code("SUB", self.static_base_pointer, "#8", result))
         try:
-            ret_val_address = self.semantic_stack.pop()
+            ret_val_address = self.get_operand(self.semantic_stack.pop())
         except IndexError:
             code = self.get_code("assign", "#0", f"@{result}")
             self.add_code(code)
