@@ -266,8 +266,9 @@ class CodeGenerator:
             args = stack[-n_args:]
             for i in range(n_args):
                 #stack.pop()
-                arg = args[i]
-                if isinstance(arg, int):
+                #arg = args[i]
+                arg_address = callee["address"] + i*4
+                '''if isinstance(arg, int):
                     arg_address = arg
                 elif "address" in arg:
                     arg_address = arg["address"]
@@ -276,7 +277,7 @@ class CodeGenerator:
                     self.add_code(
                         self.get_code("ADD", self.static_base_pointer, f"#{arg['offset']}", temp),
                         insert=backpatch)
-                    arg_address = f"@{temp}"
+                    arg_address = f"@{temp}"'''
                 # if callee["params"][-i - 1] == "array":
                 #     arg_address = f"#{arg}"  # pass by reference
                 self.add_code(self.get_code("assign", arg_address, f"@{t_args}"), insert=backpatch)
