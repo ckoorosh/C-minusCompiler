@@ -17,6 +17,8 @@ class CodeGenerator:
         self.array_field_offset = 0
         self.temp_field_offset = 0
 
+        self.token = ''
+
     @property
     def arg_counter(self):
         return [len(l) for l in self.scanner.arg_list_stack]
@@ -59,9 +61,10 @@ class CodeGenerator:
             self.program_block.append((idx, code))
         if increment:
             self.program_block_index += 1
-        # print("add code: ", idx, code)
+        # print("add code: ", idx, code, insert, increment)
 
     def add_reserved(self):
+        # print('Reserved')
         self.add_code('Reserved')
 
     def init_program(self):
@@ -141,12 +144,25 @@ class CodeGenerator:
         self.semantic_stack.append(operand)
 
     def save(self):
-        try:
-            save_address = self.program_block_index
-            self.semantic_stack.append(save_address)
-            self.add_reserved()
-        except IndexError:
-            pass
+        save_address = self.program_block_index
+        self.semantic_stack.append(save_address)
+        self.add_reserved()
+
+    def endif(self):
+        jump_address = self.semantic_stack.pop()
+        condition = self.semantic_stack.pop()
+        self.add_code(("jpf", condition, self.program_block_index), jump_address, True, False)
+
+    def if_else(self):
+        jump_address = self.semantic_stack.pop()
+        self.add_code(("jp", self.program_block_index), jump_address, True, False)
+
+    def else_(self):
+        jump_address = self.semantic_stack.pop()
+        condition = self.get_operand(self.semantic_stack.pop())
+        self.semantic_stack.append(self.program_block_index)
+        self.add_reserved()
+        self.add_code(("jpf", condition, self.program_block_index), jump_address, True, False)
 
     def break_save(self):
         self.break_stack[-1].append(self.program_block_index)
@@ -155,6 +171,7 @@ class CodeGenerator:
     def label(self):
         save_address = self.program_block_index
         self.semantic_stack.append(save_address)
+        self.break_stack.append([])
 
     def relop(self):
         try:
@@ -171,7 +188,6 @@ class CodeGenerator:
         try:
             operand = self.get_operand(self.semantic_stack.pop())
             result = self.get_operand(self.semantic_stack[-1])
-            print(self.semantic_stack)
             self.add_code(("ASSIGN", operand, result))
             if len(self.semantic_stack) > 1 and isinstance(self.semantic_stack[-2], dict) and 'type' in \
                     self.semantic_stack[-2] and self.semantic_stack[-2]['type'] == 'array':
@@ -192,7 +208,19 @@ class CodeGenerator:
         # print(input_token, 'ID')
         scope = self.scanner.scope_stack[-1]
         id_address = self.scanner.find_address(input_token, scope)
-        self.semantic_stack.append(self.scanner.symbol_table[id_address])
+        identifier = self.scanner.symbol_table[id_address]
+        if self.semantic_stack and isinstance(self.semantic_stack[-1], dict) and 'type' in self.semantic_stack[
+            -1] and self.semantic_stack[-1]['type'] == 'array':
+            index = self.get_temp()
+            self.add_code(("MULT", identifier['address'], '#4', index))
+            address = self.get_temp()
+            array_address = self.semantic_stack[-1]['address']
+            self.add_code(("ADD", index, f'#{array_address}', address))
+            self.semantic_stack.pop()
+            address = f'@{address}'
+            self.semantic_stack.append(address)
+        else:
+            self.semantic_stack.append(identifier)
 
     def push_const(self, input_token):
         # print(input_token, 'CONST')
@@ -200,7 +228,7 @@ class CodeGenerator:
             constant_value = "#" + input_token
             address = self.get_static()
             self.add_code(self.get_code("ASSIGN", constant_value, address))
-            print(self.semantic_stack)
+            # print(self.semantic_stack)
             if self.semantic_stack and isinstance(self.semantic_stack[-1], dict) and 'type' in self.semantic_stack[
                 -1] and self.semantic_stack[-1]['type'] == 'array':
                 index = self.get_temp()
@@ -214,23 +242,6 @@ class CodeGenerator:
         except IndexError:
             pass
 
-    def if_else(self):
-        try:
-            jump_address = self.semantic_stack.pop()
-            self.add_code(("jp", self.program_block_index), jump_address, True, False)
-        except IndexError:
-            pass
-
-    def else_(self):
-        try:
-            jump_address = self.semantic_stack.pop()
-            condition = self.get_operand(self.semantic_stack.pop())
-            self.semantic_stack.append(self.program_block_index)
-            self.add_reserved()
-            self.add_code(("jpf", condition, self.program_block_index), jump_address, True, False)
-        except IndexError:
-            pass
-
     def close(self):
         if self.semantic_stack:
             self.semantic_stack.pop()
@@ -238,14 +249,15 @@ class CodeGenerator:
     def return_value(self):
         result = self.get_temp()
         self.add_code(self.get_code("SUB", self.static_base_pointer, "#8", result))
-        try:
-            ret_val_address = self.get_operand(self.semantic_stack.pop())
-        except IndexError:
-            code = self.get_code("assign", "#0", f"@{result}")
-            self.add_code(code)
-        else:
-            code = self.get_code("assign", ret_val_address, f"@{result}")
-            self.add_code(code)
+        ret_val_address = self.get_operand(self.semantic_stack.pop())
+        code = self.get_code("assign", ret_val_address, f"@{result}")
+        self.add_code(code)
+
+    def return_zero(self):
+        result = self.get_temp()
+        self.add_code(self.get_code("SUB", self.static_base_pointer, "#8", result))
+        code = self.get_code("assign", "#0", f"@{result}")
+        self.add_code(code)
 
     def return_seq(self):
         return_address = self.get_temp()
@@ -391,3 +403,6 @@ class CodeGenerator:
         condition = self.semantic_stack.pop()
         jp_address = self.semantic_stack.pop()
         self.add_code(("jpf", condition, jp_address))
+        breaks = self.break_stack.pop()
+        for bloc in breaks:
+            self.add_code(("jp", self.program_block_index), bloc, True, False)

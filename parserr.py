@@ -199,13 +199,13 @@ class Sets:
              {';': -1}],
         16: [{'if': -1, '(': -1, NonTerminals.EXPRESSION: 21, ')': -1, '#save': -1, NonTerminals.STATEMENT: 14,
               NonTerminals.ELSE_STMT: 17}],
-        17: [{'endif': -1},
+        17: [{'#endif': -1, 'endif': -1},
              {'else': -1, '#else': -1, NonTerminals.STATEMENT: 14, '#if_else': -1, 'endif': -1}],
         18: [{'repeat': -1, '#label': -1, NonTerminals.STATEMENT: 14, 'until': -1, '(': -1, NonTerminals.EXPRESSION: 21,
               '#until': -1, ')': -1}],
-        19: [{'return': -1, NonTerminals.RETURN_STMT_PRIME: 20, '#return_value': -1, '#return_seq': -1}],
-        20: [{';': -1},
-             {NonTerminals.EXPRESSION: 21, ';': -1}],
+        19: [{'return': -1, NonTerminals.RETURN_STMT_PRIME: 20, '#return_seq': -1}],
+        20: [{'#return_zero': -1, ';': -1},
+             {NonTerminals.EXPRESSION: 21, '#return_value': -1, ';': -1}],
         21: [{NonTerminals.SIMPLE_EXPRESSION_ZEGOND: 24},
              {'#S_check_declaration': -1, '#S_save_fun': -1, '#S_save_type_check': -1, '#push_id': -1, 'ID': -1,
               NonTerminals.B: 22}],
@@ -383,7 +383,8 @@ class Parser:
                         break
 
     def code_gen(self, symbol, token):
-        print(symbol)
+        self.code_generator.token = token
+        print(symbol, token)
         if symbol == 'init':
             self.code_generator.init_program()
         elif symbol == 'finish':
@@ -396,6 +397,8 @@ class Parser:
             self.code_generator.save_op(token)
         elif symbol == '#save':
             self.code_generator.save()
+        elif symbol == '#endif':
+            self.code_generator.endif()
         elif symbol == '#break_save':
             self.code_generator.break_save()
         elif symbol == '#label':
@@ -418,6 +421,8 @@ class Parser:
             self.code_generator.close()
         elif symbol == '#return_value':
             self.code_generator.return_value()
+        elif symbol == '#return_zero':
+            self.code_generator.return_zero()
         elif symbol == '#return_seq':
             self.code_generator.return_seq()
         elif symbol == '#call_seq':
