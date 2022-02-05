@@ -125,8 +125,10 @@ class SemanticAnalyzer:
                     symbol_row["offset"] = self.code_generator.get_param_offset()
                 else:
                     symbol_row["address"] = self.code_generator.get_static()
-            for i in range(symbol_row["no.Args"]):
-                self.code_generator.add_code(self.code_generator.get_code("ASSIGN", "#0", symbol_row["address"]+4*i))
+            if 'address' in symbol_row:
+                for i in range(symbol_row["no.Args"]):
+                    self.code_generator.add_code(
+                        self.code_generator.get_code("ASSIGN", "#0", symbol_row["address"] + 4 * i))
             if input_token[1] == "[" and self.fun_param_list:
                 self.fun_param_list[-1] = "array"
 
@@ -155,7 +157,7 @@ class SemanticAnalyzer:
             params = self.fun_param_list
             self.scanner.symbol_table[self.scanner.find_address(symbol_idx, scope)][
                 "no.Args"] = len(params)
-            # self.scanner.symbol_table[symbol_idx]["params"] = params
+            self.scanner.symbol_table[self.scanner.find_address(symbol_idx, scope)]["params"] = params
             self.fun_param_list = []
             self.code_generator.stack.append(0)
 
@@ -197,15 +199,14 @@ class SemanticAnalyzer:
                     self.scanner.error_flag = True
                     self.semantic_errors.append((line_number, f"Mismatch in numbers of arguments of '{lexeme}'."))
                 else:
-                    pass
-                    # params = self.scanner.symbol_table[self.scanner.find_address(fun_id)]["params"]
-                    # i = 1
-                    # for param, arg in zip(params, args):
-                    #     if param != arg and arg is not None:
-                    #         self.scanner.error_flag = True
-                    #         self._semantic_errors.append((line_number,
-                    #                                       f"Mismatch in type of argument {i} of '{lexeme}'. Expected '{param}' but got '{arg}' instead."))
-                    #     i += 1
+                    params = self.scanner.symbol_table[self.scanner.find_address(fun_id, scope)]["params"]
+                    i = 1
+                    for param, arg in zip(params, args):
+                        if param != arg and arg is not None:
+                            self.scanner.error_flag = True
+                            self.semantic_errors.append((line_number,
+                                                         f"Mismatch in type of argument {i} of '{lexeme}'. Expected '{param}' but got '{arg}' instead."))
+                        i += 1
 
     def check_break(self, line_number):  # TODO
         if self.while_counter <= 0 and self.switch_counter <= 0:
@@ -251,4 +252,4 @@ class SemanticAnalyzer:
             pass
 
     def get_scope(self):
-        return self.scanner.scope_stack[-1]
+        return len(self.scanner.scope_stack) - 1

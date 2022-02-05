@@ -59,7 +59,8 @@ class Scanner:
             "fnuc/var": "function",
             "no.Args": 1,
             "type": "void",
-            "scope": 0
+            "scope": 0,
+            "params": ["int"]
         }]
         self.scope_stack = [0]
         self.input_file = input_file
@@ -150,13 +151,13 @@ class Scanner:
         self.tokens[self.current_line].append((token_type.name, lexeme))
 
     def add_to_symbol_table(self, token):
-        scope = self.scope_stack[-1]
+        scope = len(self.scope_stack) - 1
         if token is not None:
             (token_type, lexeme) = token
-            if token_type == TokenType.KEYWORD or token_type == TokenType.ID:
+            if token_type == TokenType.ID:
                 if self.find_address(lexeme, scope) == -1:
                     self.symbol_table.append(
-                        {"lexeme": lexeme, "scope": len(self.scope_stack) - 1, "fnuc/var": "local_var"})
+                        {"lexeme": lexeme, "scope": scope, "fnuc/var": "local_var"})
 
     def get_next_token(self):
         input_ended = False
@@ -367,7 +368,7 @@ class Scanner:
 
     def find_address(self, lexeme, scope):
         for i in range(len(self.symbol_table)):
-            if self.symbol_table[i]["lexeme"] == lexeme and i >= scope:
+            if self.symbol_table[i]["lexeme"] == lexeme and self.symbol_table[i]["scope"] <= scope:
                 return i
 
         return -1

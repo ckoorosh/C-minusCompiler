@@ -201,7 +201,7 @@ class Sets:
               NonTerminals.ELSE_STMT: 17}],
         17: [{'endif': -1},
              {'else': -1, '#else': -1, NonTerminals.STATEMENT: 14, '#if_else': -1, 'endif': -1}],
-        18: [{'repeat': -1, NonTerminals.STATEMENT: 14, '#label': -1, 'until': -1, '(': -1, NonTerminals.EXPRESSION: 21,
+        18: [{'repeat': -1, '#label': -1, NonTerminals.STATEMENT: 14, 'until': -1, '(': -1, NonTerminals.EXPRESSION: 21,
               '#until': -1, ')': -1}],
         19: [{'return': -1, NonTerminals.RETURN_STMT_PRIME: 20, '#return_value': -1, '#return_seq': -1}],
         20: [{';': -1},
@@ -400,6 +400,8 @@ class Parser:
             self.code_generator.break_save()
         elif symbol == '#label':
             self.code_generator.label()
+        elif symbol == '#until':
+            self.code_generator.until()
         elif symbol == '#relop':
             self.code_generator.relop()
         elif symbol == '#assign':
