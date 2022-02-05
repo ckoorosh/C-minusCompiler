@@ -175,7 +175,7 @@ class Sets:
             {'[': -1, '#S_assign_length': -1, 'NUM': -1, ']': -1, ';': -1}],
         6: [{'(': -1, '#S_in_scope': -1, '#S_save_main': -1, NonTerminals.PARAMS: 8, '#S_assign_fun_attributes': -1,
              ')': -1, '#S_main_check': -1, NonTerminals.COMPOUND_STMT: 12,
-             '#sf_size': -1, '#return_seq': -1, '#S_out_scope': -1}],
+             '#sf_size': -1, '#return_zero': -1, '#return_seq': -1, '#S_out_scope': -1}],
         7: [{'int': -1},
             {'void': -1}],
         8: [{'#S_save_type': -1, '#S_save_param': -1, 'int': -1, '#S_assign_type': -1, 'ID': -1,

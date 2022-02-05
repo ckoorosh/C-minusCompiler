@@ -204,13 +204,17 @@ class CodeGenerator:
         except IndexError:
             pass
 
+    def is_array(self, identifier):
+        return self.semantic_stack and isinstance(identifier, dict) and 'type' in identifier and identifier[
+            'type'] == 'array'
+
     def push_id(self, input_token):
         # print(input_token, 'ID')
         scope = self.scanner.scope_stack[-1]
         id_address = self.scanner.find_address(input_token, scope)
         identifier = self.scanner.symbol_table[id_address]
-        if self.semantic_stack and isinstance(self.semantic_stack[-1], dict) and 'type' in self.semantic_stack[
-            -1] and self.semantic_stack[-1]['type'] == 'array':
+        print(self.semantic_stack)
+        if self.semantic_stack and self.is_array(self.semantic_stack[-1]) and not self.is_array(identifier):
             index = self.get_temp()
             self.add_code(("MULT", identifier['address'], '#4', index))
             address = self.get_temp()
@@ -228,7 +232,6 @@ class CodeGenerator:
             constant_value = "#" + input_token
             address = self.get_static()
             self.add_code(self.get_code("ASSIGN", constant_value, address))
-            # print(self.semantic_stack)
             if self.semantic_stack and isinstance(self.semantic_stack[-1], dict) and 'type' in self.semantic_stack[
                 -1] and self.semantic_stack[-1]['type'] == 'array':
                 index = self.get_temp()
@@ -239,6 +242,7 @@ class CodeGenerator:
                 self.semantic_stack.pop()
                 address = f'@{address}'
             self.semantic_stack.append(address)
+            print(self.semantic_stack)
         except IndexError:
             pass
 
@@ -328,8 +332,6 @@ class CodeGenerator:
             t_ret_val_callee = self.get_temp()
             self.add_code(self.get_code("SUB", t_new_top_sp, "#4", t_ret_addr), insert=backpatch)
             self.add_code(self.get_code("SUB", t_new_top_sp, "#8", t_ret_val_callee), insert=backpatch)
-            # increment stack frame pointer by frame size TODO: update stack pointer via access link and static offset
-            # self.add_code(self.get_code("ADD", top_sp, f"#{frame_size}", top_sp), insert=backpatch)
             self.add_code(self.get_code("assign", t_new_top_sp, top_sp), insert=backpatch)
             self.add_code(
                 self.get_code("assign", f"#{self.program_block_index + 2}", f"@{t_ret_addr}"),
