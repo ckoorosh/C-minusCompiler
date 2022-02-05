@@ -49,6 +49,7 @@ class CodeGenerator:
         return code + ")"
 
     def add_code(self, code, idx=None, insert=False, increment=True):
+        
         if idx is None:
             idx = self.program_block_index
         if isinstance(code, tuple):
@@ -59,6 +60,7 @@ class CodeGenerator:
             self.program_block.append((idx, code))
         if increment:
             self.program_block_index += 1
+        print("add code: ", idx, code)
 
     def add_reserved(self):
         self.add_code('Reserved')
@@ -172,22 +174,33 @@ class CodeGenerator:
             operand = self.get_operand(self.semantic_stack.pop())
             result = self.get_operand(self.semantic_stack[-1])
             self.add_code(("ASSIGN", operand, result))
-            print("ggggggggggggggggggggggggggggggggggggg", result)
         except IndexError:
             pass
 
     def push_id(self, input_token):
+        print(input_token)
+        
         scope = self.scanner.scope_stack[-1]
         id_address = self.scanner.find_address(input_token, scope)
-        print("pppppppppppp", input_token, self.scanner.symbol_table[id_address])
         self.semantic_stack.append(self.scanner.symbol_table[id_address])
 
+
+
     def push_const(self, input_token):
+        print(input_token)
         try:
             constant_value = "#" + input_token
             address = self.get_static()
             self.add_code(self.get_code("ASSIGN", constant_value, address))
             self.semantic_stack.append(address)
+            
+            '''if arr_flag:
+                addr = self.get_static()
+                self.add_code(self.get_code("MULT", "#4" ,constant_value, addr))
+                address = self.get_temp()
+                self.add_code(self.get_code("ADD", addr ,array_addr, address))
+                self.semantic_stack.pop()
+                self.semantic_stack.append(address)'''
         except IndexError:
             pass
 
@@ -235,8 +248,6 @@ class CodeGenerator:
         
         stack = self.semantic_stack if not backpatch else self.call_seq_stack
 
-        print(f'stack: {stack, backpatch}')
-
 
         if backpatch:
             callee = stack.pop()
@@ -253,8 +264,10 @@ class CodeGenerator:
             arg = stack.pop()
             stack.pop()
             arg_address = self.get_operand(arg)
+            print("111111111111111111111111111111111")
             self.add_code(self.get_code("assign", arg_address, self.static_base_pointer + 4))
             self.add_code(self.get_code("PRINT", self.static_base_pointer + 4))
+            print("111111111111111111111111111111111")
             self.arg_counter[-1] = 0
             self.semantic_stack.append("void")
             return
@@ -267,10 +280,12 @@ class CodeGenerator:
             top_sp = self.static_base_pointer
             frame_size = caller["frame_size"]
             t_new_top_sp = self.get_temp()
+            print("22222222222222222222222222222222")
             self.add_code(self.get_code("ADD", top_sp, f"#{frame_size}", t_new_top_sp), insert=backpatch)
             self.add_code(self.get_code("assign", top_sp, f"@{t_new_top_sp}"), insert=backpatch)
             t_args = self.get_temp()
             self.add_code(self.get_code("ADD", t_new_top_sp, "#4", t_args), insert=backpatch)
+            print("22222222222222222222222222222222")
             n_args = callee["no.Args"]
             args = stack[-n_args:]
             for i in range(n_args):
@@ -289,18 +304,22 @@ class CodeGenerator:
                     arg_address = f"@{temp}"
                 # if callee["params"][-i - 1] == "array":
                 #     arg_address = f"#{arg}"  # pass by reference
+                print("3333333333333333333333333333333333")
                 self.add_code(self.get_code("assign", arg_address, f"@{t_args}"), insert=backpatch)
                 self.add_code(self.get_code("ADD", t_args, "#4", t_args), insert=backpatch)
+                print("3333333333333333333333333333333333")
             stack.pop()
             fun_addr = stack.pop()["address"]
             t_ret_addr = self.get_temp()
             t_ret_val_callee = self.get_temp()
+            print("4444444444444444444444444444444444")
             self.add_code(self.get_code("SUB", t_new_top_sp, "#4", t_ret_addr), insert=backpatch)
             self.add_code(self.get_code("SUB", t_new_top_sp, "#8", t_ret_val_callee), insert=backpatch)
             # increment stack frame pointer by frame size TODO: update stack pointer via access link and static offset
             # self._add_three_addr_code(self._get_add_code(top_sp, f"#{frame_size}", top_sp), insert=backpatch)
             self.add_code(self.get_code("assign", t_new_top_sp, top_sp), insert=backpatch)
             # self._add_three_addr_code(self._get_three_addr_code("print", top_sp), insert=backpatch)
+            
 
             self.add_code(
                 self.get_code("assign", f"#{self.program_block_index + 2}", f"@{t_ret_addr}"),
@@ -310,6 +329,7 @@ class CodeGenerator:
                           insert=backpatch)
             self.add_code(self.get_code("SUB", top_sp, f"#{frame_size}", top_sp), insert=backpatch)
             # self._add_three_addr_code(self._get_three_addr_code("print", top_sp), insert=backpatch)
+            print("4444444444444444444444444444444444")
         else:
             callee = stack[-(self.arg_counter[-1] + 1)]
             self.call_seq_stack += self.semantic_stack[-(self.arg_counter[-1] + 1):]
