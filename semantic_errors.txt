@@ -1,0 +1,12 @@
+#8 : Semantic Error! Type mismatch in operands, Got array instead of int.
+#9 : Semantic Error! Type mismatch in operands, Got array instead of int.
+#11 : Semantic Error! Type mismatch in operands, Got array instead of int.
+#12 : Semantic Error! Type mismatch in operands, Got array instead of int.
+#14 : Semantic Error! Type mismatch in operands, Got array instead of int.
+#15 : Semantic Error! Type mismatch in operands, Got array instead of int.
+#18 : Semantic Error! Type mismatch in operands, Got array instead of int.
+#18 : Semantic Error! Type mismatch in operands, Got array instead of int.
+#18 : Semantic Error! Mismatch in type of argument 1 of 'f'. Expected 'int' but got 'array' instead.
+#18 : Semantic Error! Type mismatch in operands, Got array instead of int.
+#18 : Semantic Error! Mismatch in type of argument 1 of 'f'. Expected 'int' but got 'array' instead.
+#19 : Semantic Error! Type mismatch in operands, Got array instead of int.
