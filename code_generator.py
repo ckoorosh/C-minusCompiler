@@ -27,6 +27,7 @@ class CodeGenerator:
         self.last_callee_return=''
         self.last_callee_pb_index=''
         self.recursive_addr=[]
+        self.index_array = 0
 
     @property
     def arg_counter(self):
@@ -228,38 +229,46 @@ class CodeGenerator:
                     x = (self.program_block[recur["index"]][1]).replace(str(self.last_callee_return), str(result))
                     self.program_block[recur["index"]] = (self.program_block[recur["index"]][0], x)
             self.add_code(("ASSIGN", operand, result))
-            if len(self.semantic_stack) > 1 and isinstance(self.semantic_stack[-2], dict) and 'type' in \
-                    self.semantic_stack[-2] and self.semantic_stack[-2]['type'] == 'array':
-                index = self.get_temp()
-                self.add_code(("MULT", result, '#4', index))
-                address = self.get_temp()
-                array_address = self.semantic_stack[-2]['address']
-                self.add_code(("ADD", index, f'#{array_address}', address))
-                address = f'@{address}'
-                self.semantic_stack.pop()
-                self.semantic_stack.pop()
-                self.semantic_stack.append(address)
-
         except IndexError:
             pass
 
-    def push_id(self, input_token):
-        # print(input_token, 'ID')
-        scope = self.scanner.scope_stack[-1]
-        id_address = self.scanner.find_address(input_token, scope)
-        identifier = self.scanner.symbol_table[id_address]
-        if self.semantic_stack and isinstance(self.semantic_stack[-1], dict) and 'type' in self.semantic_stack[
-            -1] and self.semantic_stack[-1]['type'] == 'array':
+    def is_array(self, identifier):
+        return self.semantic_stack and isinstance(identifier, dict) and 'type' in identifier and identifier[
+            'type'] == 'array'
+
+    def assign_array(self):
+        print('ASSING_ARRAY')
+        index_address = self.get_operand(self.semantic_stack.pop())
+        if 'address' in self.semantic_stack[-1]:
             index = self.get_temp()
-            self.add_code(("MULT", identifier['address'], '#4', index))
+            self.add_code(("MULT", index_address, '#4', index))
             address = self.get_temp()
             array_address = self.semantic_stack[-1]['address']
             self.add_code(("ADD", index, f'#{array_address}', address))
             self.semantic_stack.pop()
             address = f'@{address}'
             self.semantic_stack.append(address)
-        else:
-            self.semantic_stack.append(identifier)
+        elif 'offset' in self.semantic_stack[-1]:
+            index = self.get_temp()
+            self.add_code(("MULT", index_address, '#4', index))
+            address = self.get_temp()
+            temp = self.get_temp()
+            self.add_code(
+                self.get_code("ADD", self.static_base_pointer, f"#{self.semantic_stack[-1]['offset']}", temp))
+            array_address = f"@{temp}"
+            self.add_code(("ADD", index, array_address, address))
+            self.semantic_stack.pop()
+            address = f'@{address}'
+            self.semantic_stack.append(address)
+        print(self.semantic_stack)
+
+    def push_id(self, input_token):
+        # print(input_token, 'ID')
+        scope = len(self.scanner.scope_stack) - 1
+        id_address = self.scanner.find_address(input_token, scope)
+        identifier = self.scanner.symbol_table[id_address]
+        self.semantic_stack.append(identifier)
+        print(self.semantic_stack)
 
     def push_const(self, input_token):
         # print(input_token, 'CONST')
@@ -267,17 +276,8 @@ class CodeGenerator:
             constant_value = "#" + input_token
             address = self.get_static()
             self.add_code(self.get_code("ASSIGN", constant_value, address))
-            # print(self.semantic_stack)
-            if self.semantic_stack and isinstance(self.semantic_stack[-1], dict) and 'type' in self.semantic_stack[
-                -1] and self.semantic_stack[-1]['type'] == 'array':
-                index = self.get_temp()
-                self.add_code(("MULT", address, '#4', index))
-                address = self.get_temp()
-                array_address = self.semantic_stack[-1]['address']
-                self.add_code(("ADD", index, f'#{array_address}', address))
-                self.semantic_stack.pop()
-                address = f'@{address}'
             self.semantic_stack.append(address)
+            print(self.semantic_stack)
         except IndexError:
             pass
 
@@ -365,9 +365,11 @@ class CodeGenerator:
                         self.get_code("ADD", self.static_base_pointer, f"#{arg['offset']}", temp),
                         insert=backpatch)
                     arg_address = f"@{temp}"
-                print(callee)
-                if callee["params"][-i - 1] == "array":
-                    arg_address = f"#{arg}"  # pass by reference
+                if callee["params"][-i] == "array":
+                    if not isinstance(arg_address, int) and arg_address.startswith('@'):
+                        pass
+                    else:
+                        arg_address = f"#{arg_address}"  # pass by reference
                 self.add_code(self.get_code("assign", arg_address, f"@{t_args}"), insert=backpatch)
                 self.add_code(self.get_code("ADD", t_args, "#4", t_args), insert=backpatch)
             fun_addr = stack.pop()["address"]
@@ -375,8 +377,6 @@ class CodeGenerator:
             t_ret_val_callee = self.get_temp()
             self.add_code(self.get_code("SUB", t_new_top_sp, "#4", t_ret_addr), insert=backpatch)
             self.add_code(self.get_code("SUB", t_new_top_sp, "#8", t_ret_val_callee), insert=backpatch)
-            # increment stack frame pointer by frame size TODO: update stack pointer via access link and static offset
-            # self.add_code(self.get_code("ADD", top_sp, f"#{frame_size}", top_sp), insert=backpatch)
             self.add_code(self.get_code("assign", t_new_top_sp, top_sp), insert=backpatch)
             self.add_code(
                 self.get_code("assign", f"#{self.program_block_index + 2}", f"@{t_ret_addr}"),

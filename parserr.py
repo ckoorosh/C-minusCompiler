@@ -175,7 +175,7 @@ class Sets:
             {'[': -1, '#S_assign_length': -1, 'NUM': -1, ']': -1, ';': -1}],
         6: [{'(': -1, '#S_in_scope': -1, '#S_save_main': -1, NonTerminals.PARAMS: 8, '#S_assign_fun_attributes': -1,
              ')': -1, '#S_main_check': -1, NonTerminals.COMPOUND_STMT: 12,
-             '#sf_size': -1, '#return_seq': -1, '#S_out_scope': -1}],
+             '#sf_size': -1, '#return_zero': -1, '#return_seq': -1, '#S_out_scope': -1}],
         7: [{'int': -1},
             {'void': -1}],
         8: [{'#S_save_type': -1, '#S_save_param': -1, 'int': -1, '#S_assign_type': -1, 'ID': -1,
@@ -201,8 +201,8 @@ class Sets:
               NonTerminals.ELSE_STMT: 17}],
         17: [{'#endif': -1, 'endif': -1},
              {'else': -1, '#else': -1, NonTerminals.STATEMENT: 14, '#if_else': -1, 'endif': -1}],
-        18: [{'repeat': -1, '#label': -1, NonTerminals.STATEMENT: 14, 'until': -1, '(': -1, NonTerminals.EXPRESSION: 21,
-              '#until': -1, ')': -1}],
+        18: [{'repeat': -1, '#S_in_until': -1, '#label': -1, NonTerminals.STATEMENT: 14, 'until': -1, '(': -1, NonTerminals.EXPRESSION: 21,
+              '#until': -1, ')': -1, '#S_out_until': -1}],
         19: [{'return': -1, NonTerminals.RETURN_STMT_PRIME: 20, '#return_seq': -1}],
         20: [{'#return_zero': -1, ';': -1},
              {NonTerminals.EXPRESSION: 21, '#return_value': -1, ';': -1}],
@@ -325,6 +325,7 @@ class Parser:
         self._parse(0)
         self.code_gen('finish', None)
         self.code_generator.save_output()
+        self.semantic_analyzer.save_semantic_errors()
 
     def _parse(self, state, parent=None):
         if NonTerminals(state).name != "PROGRAM":
@@ -383,6 +384,8 @@ class Parser:
                         break
 
     def code_gen(self, symbol, token):
+        # if self.scanner.error_flag:
+        #     return
         self.code_generator.token = token
         print(symbol, token)
         if symbol == 'init':
@@ -457,17 +460,19 @@ class Parser:
         elif action == '#S_assign_param_role':
             self.semantic_analyzer.assign_param_role(token, self.scanner.current_line)
         elif action == '#S_check_break':
-            self.semantic_analyzer.check_break(token)
+            self.semantic_analyzer.check_break(self.scanner.current_line)
         elif action == '#S_check_declaration':
             self.semantic_analyzer.check_declaration(token, self.scanner.current_line)
         elif action == '#S_save_fun':
             self.semantic_analyzer.save_fun(token)
         elif action == '#S_save_type_check':
             self.semantic_analyzer.save_type_check(token)
+        elif action == '#S_type_check':
+            self.semantic_analyzer.type_check(self.scanner.current_line)
         elif action == '#S_push_arg_stack':
             self.semantic_analyzer.push_arg_stack()
         elif action == '#S_check_args':
-            self.semantic_analyzer.check_args(token)
+            self.semantic_analyzer.check_args(self.scanner.current_line)
         elif action == '#S_pop_arg_stack':
             self.semantic_analyzer.pop_arg_stack()
         elif action == '#S_index_array':
@@ -476,6 +481,10 @@ class Parser:
             self.semantic_analyzer.index_array_pop()
         elif action == '#S_save_arg':
             self.semantic_analyzer.save_arg(token)
+        elif action == '#S_in_until':
+            self.semantic_analyzer.in_until()
+        elif action == '#S_out_until':
+            self.semantic_analyzer.out_until()
 
     def add_error(self, error):
         self.errors.append((self.scanner.current_line, error))
