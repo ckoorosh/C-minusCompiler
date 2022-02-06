@@ -1,3 +1,6 @@
+from subprocess import call
+
+
 class CodeGenerator:
     def __init__(self, scanner):
         self.scanner = scanner
@@ -18,6 +21,12 @@ class CodeGenerator:
         self.temp_field_offset = 0
 
         self.token = ''
+        self.flag=0
+        self.cnt = 0
+        self.last_callee=''
+        self.last_callee_return=''
+        self.last_callee_pb_index=''
+        self.recursive_addr=[]
 
     @property
     def arg_counter(self):
@@ -116,7 +125,19 @@ class CodeGenerator:
             result = self.get_temp()
             operand2 = self.get_operand(self.semantic_stack.pop())
             operand1 = self.get_operand(self.semantic_stack.pop())
-            self.add_code((op, operand1, operand2, result))
+            temp = self.get_temp()
+            if operand1 == self.last_callee_return:
+                self.add_code(("ASSIGN", self.last_callee_return, temp,))
+                self.add_code((op, temp, operand2, result))
+                self.recursive_addr.append({"lexeme":self.last_callee, "index":self.program_block_index-2})
+                print("      rrrrecursiveeee", self.recursive_addr)
+            if operand2 == self.last_callee_return:
+                self.add_code(("ASSIGN", self.last_callee_return, temp,))
+                self.add_code((op, operand1, temp, result))
+                self.recursive_addr.append({"lexeme":self.last_callee, "index":(self.program_block_index - 2)})
+                print("      rrrrecursiveeee", self.recursive_addr)
+            if not (operand1 == self.last_callee_return or operand2 == self.last_callee_return):
+                self.add_code((op, operand1, operand2, result))
             self.semantic_stack.append(result)
         except IndexError:
             pass
@@ -126,7 +147,19 @@ class CodeGenerator:
             result = self.get_temp()
             operand2 = self.get_operand(self.semantic_stack.pop())
             operand1 = self.get_operand(self.semantic_stack.pop())
-            self.add_code(("MULT", operand1, operand2, result))
+            temp = self.get_temp()
+            if operand1 == self.last_callee_return:
+                self.add_code(("ASSIGN", self.last_callee_return, temp,))
+                self.add_code(("MULT", temp, operand2, result))
+                self.recursive_addr.append({"lexeme":self.last_callee, "index":self.program_block_index-2})
+                print("      rrrrecursiveeee", self.recursive_addr)
+            if operand2 == self.last_callee_return:
+                self.add_code(("ASSIGN", self.last_callee_return, temp,))
+                self.add_code(("MULT", operand1, temp, result))
+                self.recursive_addr.append({"lexeme":self.last_callee, "index":self.program_block_index-2})
+                print("      rrrrecursiveeee", self.recursive_addr)
+            if not (operand1 == self.last_callee_return or operand2 == self.last_callee_return):
+                self.add_code(("MULT", operand1, operand2, result))
             self.semantic_stack.append(result)
         except IndexError:
             pass
@@ -188,6 +221,12 @@ class CodeGenerator:
         try:
             operand = self.get_operand(self.semantic_stack.pop())
             result = self.get_operand(self.semantic_stack[-1])
+            print("              annnnnnnn",operand, result)
+            
+            if len(self.recursive_addr) > 0:
+                    recur = self.recursive_addr.pop()
+                    x = (self.program_block[recur["index"]][1]).replace(str(self.last_callee_return), str(result))
+                    self.program_block[recur["index"]] = (self.program_block[recur["index"]][0], x)
             self.add_code(("ASSIGN", operand, result))
             if len(self.semantic_stack) > 1 and isinstance(self.semantic_stack[-2], dict) and 'type' in \
                     self.semantic_stack[-2] and self.semantic_stack[-2]['type'] == 'array':
@@ -269,7 +308,7 @@ class CodeGenerator:
     def call_seq(self, backpatch=False):
         stack = self.semantic_stack if not backpatch else self.call_seq_stack
 
-        print(stack)
+        print("",stack,"\n")
 
         if backpatch:
             callee = stack.pop()
@@ -279,6 +318,11 @@ class CodeGenerator:
             self.program_block_index = stack.pop()
         else:
             callee = stack[-(self.arg_counter[-1] + 1)]
+
+        
+      
+        self.last_callee = callee["lexeme"]
+        
 
         caller = self.scanner.symbol_table[self.scanner.scope_stack[-1] - 1]
 
@@ -293,6 +337,9 @@ class CodeGenerator:
             return
 
         if not backpatch:
+            if self.flag==1:
+                #TODO
+                pass
             return_value = self.get_temp()
 
         if "frame_size" in caller:
@@ -347,10 +394,26 @@ class CodeGenerator:
                 if not isinstance(arg, int) and "offset" in arg:
                     num_offset_vars += 1
             self.semantic_stack = self.semantic_stack[:-(self.arg_counter[-1] + 1)]
+
             self.call_seq_stack.append(self.program_block_index)
             self.call_seq_stack.append(self.arg_counter[-1])
             self.call_seq_stack.append(return_value)
             self.call_seq_stack.append(callee)
+
+
+            if self.flag:
+
+                #TODO self.add_code(self.get_code("assign", f"@{last_callee_return}", return_value),
+                pass
+            
+            '''for i in range(len(self.recursive_addr)):
+                if self.recursive_addr[i]["lexeme"] == callee["lexeme"]:
+                        x = (self.program_block[self.recursive_addr[i]["index"]][1]).replace(str(self.last_callee_return), str(return_value))
+                        self.program_block[self.recursive_addr[i]["index"]] = (self.program_block[self.recursive_addr[i]["index"]][0], x)
+                        print("             aaaaaaaa      ", self.program_block[self.recursive_addr[i]["index"]], self.last_callee_return, x)'''
+            self.last_callee_return = return_value
+            print("             sefdfs        ", return_value, callee["lexeme"])
+            
 
             for _ in range(10 + callee["no.Args"] * 2 + num_offset_vars):
                 self.add_reserved()
