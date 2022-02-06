@@ -58,7 +58,7 @@ class SemanticAnalyzer:
         else:
             errors.append("The input program is semantically correct.\n")
         errors = "".join(errors)
-        with open(self.semantic_error_file, "w") as f:
+        with open('semantic_errors.txt', "w") as f:
             f.write(errors)
 
     def save_main(self, input_token):
@@ -228,10 +228,14 @@ class SemanticAnalyzer:
     def index_array(self):
         if self.semantic_stacks["type_check"]:
             self.semantic_stacks["type_check"][-1] = "int"
+            self.code_generator.index_array = True
+            if self.scanner.arg_list_stack:
+                self.scanner.arg_list_stack[-1][-1] = "int"
 
     def index_array_pop(self):
         if self.semantic_stacks["type_check"]:
             self.semantic_stacks["type_check"].pop()
+            self.code_generator.index_array = False
 
     def type_check(self, line_number):
         try:
@@ -241,11 +245,11 @@ class SemanticAnalyzer:
                 if operand_a_type == "array":
                     self.scanner.error_flag = True
                     self.semantic_errors.append((line_number,
-                                                 f"Type mismatch in operands, Got '{operand_a_type}' instead of 'int'."))
+                                                 f"Type mismatch in operands, Got {operand_a_type} instead of int."))
                 elif operand_a_type != operand_b_type:
                     self.scanner.error_flag = True
                     self.semantic_errors.append((line_number,
-                                                 f"Type mismatch in operands, Got '{operand_b_type}' instead of '{operand_a_type}'."))
+                                                 f"Type mismatch in operands, Got {operand_b_type} instead of {operand_a_type}."))
                 else:
                     self.semantic_stacks["type_check"].append(operand_a_type)
         except IndexError:

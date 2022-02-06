@@ -325,6 +325,7 @@ class Parser:
         self._parse(0)
         self.code_gen('finish', None)
         self.code_generator.save_output()
+        self.semantic_analyzer.save_semantic_errors()
 
     def _parse(self, state, parent=None):
         if NonTerminals(state).name != "PROGRAM":
@@ -383,6 +384,8 @@ class Parser:
                         break
 
     def code_gen(self, symbol, token):
+        if self.scanner.error_flag:
+            return
         self.code_generator.token = token
         print(symbol, token)
         if symbol == 'init':
@@ -457,17 +460,19 @@ class Parser:
         elif action == '#S_assign_param_role':
             self.semantic_analyzer.assign_param_role(token, self.scanner.current_line)
         elif action == '#S_check_break':
-            self.semantic_analyzer.check_break(token)
+            self.semantic_analyzer.check_break(self.scanner.current_line)
         elif action == '#S_check_declaration':
             self.semantic_analyzer.check_declaration(token, self.scanner.current_line)
         elif action == '#S_save_fun':
             self.semantic_analyzer.save_fun(token)
         elif action == '#S_save_type_check':
             self.semantic_analyzer.save_type_check(token)
+        elif action == '#S_type_check':
+            self.semantic_analyzer.type_check(self.scanner.current_line)
         elif action == '#S_push_arg_stack':
             self.semantic_analyzer.push_arg_stack()
         elif action == '#S_check_args':
-            self.semantic_analyzer.check_args(token)
+            self.semantic_analyzer.check_args(self.scanner.current_line)
         elif action == '#S_pop_arg_stack':
             self.semantic_analyzer.pop_arg_stack()
         elif action == '#S_index_array':

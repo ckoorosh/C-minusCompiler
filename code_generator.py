@@ -18,6 +18,7 @@ class CodeGenerator:
         self.temp_field_offset = 0
 
         self.token = ''
+        self.index_array = False
 
     @property
     def arg_counter(self):
@@ -213,16 +214,30 @@ class CodeGenerator:
         scope = self.scanner.scope_stack[-1]
         id_address = self.scanner.find_address(input_token, scope)
         identifier = self.scanner.symbol_table[id_address]
-        print(self.semantic_stack)
-        if self.semantic_stack and self.is_array(self.semantic_stack[-1]) and not self.is_array(identifier):
-            index = self.get_temp()
-            self.add_code(("MULT", identifier['address'], '#4', index))
-            address = self.get_temp()
-            array_address = self.semantic_stack[-1]['address']
-            self.add_code(("ADD", index, f'#{array_address}', address))
-            self.semantic_stack.pop()
-            address = f'@{address}'
-            self.semantic_stack.append(address)
+        # print(self.semantic_stack)
+        if self.semantic_stack and self.is_array(self.semantic_stack[-1]) and not self.is_array(
+                identifier) and self.index_array:
+            if 'address' in self.semantic_stack[-1]:
+                index = self.get_temp()
+                self.add_code(("MULT", identifier['address'], '#4', index))
+                address = self.get_temp()
+                array_address = self.semantic_stack[-1]['address']
+                self.add_code(("ADD", index, f'#{array_address}', address))
+                self.semantic_stack.pop()
+                address = f'@{address}'
+                self.semantic_stack.append(address)
+            elif 'offset' in self.semantic_stack[-1]:
+                index = self.get_temp()
+                self.add_code(("MULT", identifier['address'], '#4', index))
+                address = self.get_temp()
+                temp = self.get_temp()
+                self.add_code(
+                    self.get_code("ADD", self.static_base_pointer, f"#{self.semantic_stack[-1]['offset']}", temp))
+                array_address = f"@{temp}"
+                self.add_code(("ADD", index, array_address, address))
+                self.semantic_stack.pop()
+                address = f'@{address}'
+                self.semantic_stack.append(address)
         else:
             self.semantic_stack.append(identifier)
 
@@ -232,17 +247,28 @@ class CodeGenerator:
             constant_value = "#" + input_token
             address = self.get_static()
             self.add_code(self.get_code("ASSIGN", constant_value, address))
-            if self.semantic_stack and isinstance(self.semantic_stack[-1], dict) and 'type' in self.semantic_stack[
-                -1] and self.semantic_stack[-1]['type'] == 'array':
-                index = self.get_temp()
-                self.add_code(("MULT", address, '#4', index))
-                address = self.get_temp()
-                array_address = self.semantic_stack[-1]['address']
-                self.add_code(("ADD", index, f'#{array_address}', address))
-                self.semantic_stack.pop()
-                address = f'@{address}'
+            if self.semantic_stack and self.is_array(self.semantic_stack[-1]) and self.index_array:
+                if 'address' in self.semantic_stack[-1]:
+                    index = self.get_temp()
+                    self.add_code(("MULT", address, '#4', index))
+                    address = self.get_temp()
+                    array_address = self.semantic_stack[-1]['address']
+                    self.add_code(("ADD", index, f'#{array_address}', address))
+                    self.semantic_stack.pop()
+                    address = f'@{address}'
+                elif 'offset' in self.semantic_stack[-1]:
+                    index = self.get_temp()
+                    self.add_code(("MULT", address, '#4', index))
+                    address = self.get_temp()
+                    temp = self.get_temp()
+                    self.add_code(
+                        self.get_code("ADD", self.static_base_pointer, f"#{self.semantic_stack[-1]['offset']}", temp))
+                    array_address = f"@{temp}"
+                    self.add_code(("ADD", index, array_address, address))
+                    self.semantic_stack.pop()
+                    address = f'@{address}'
             self.semantic_stack.append(address)
-            print(self.semantic_stack)
+            # print(self.semantic_stack)
         except IndexError:
             pass
 
@@ -322,9 +348,9 @@ class CodeGenerator:
                         self.get_code("ADD", self.static_base_pointer, f"#{arg['offset']}", temp),
                         insert=backpatch)
                     arg_address = f"@{temp}"
-                print(callee)
-                if callee["params"][-i - 1] == "array":
-                    arg_address = f"#{arg}"  # pass by reference
+                if callee["params"][-i] == "array":
+                    print('ARG', arg)
+                    arg_address = f"#{arg_address}"  # pass by reference
                 self.add_code(self.get_code("assign", arg_address, f"@{t_args}"), insert=backpatch)
                 self.add_code(self.get_code("ADD", t_args, "#4", t_args), insert=backpatch)
             fun_addr = stack.pop()["address"]
