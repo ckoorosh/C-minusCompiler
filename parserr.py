@@ -201,8 +201,8 @@ class Sets:
               NonTerminals.ELSE_STMT: 17}],
         17: [{'#endif': -1, 'endif': -1},
              {'else': -1, '#else': -1, NonTerminals.STATEMENT: 14, '#if_else': -1, 'endif': -1}],
-        18: [{'repeat': -1, '#label': -1, NonTerminals.STATEMENT: 14, 'until': -1, '(': -1, NonTerminals.EXPRESSION: 21,
-              '#until': -1, ')': -1}],
+        18: [{'repeat': -1, '#S_in_until': -1, '#label': -1, NonTerminals.STATEMENT: 14, 'until': -1, '(': -1, NonTerminals.EXPRESSION: 21,
+              '#until': -1, ')': -1, '#S_out_until': -1}],
         19: [{'return': -1, NonTerminals.RETURN_STMT_PRIME: 20, '#return_seq': -1}],
         20: [{'#return_zero': -1, ';': -1},
              {NonTerminals.EXPRESSION: 21, '#return_value': -1, ';': -1}],
@@ -384,8 +384,8 @@ class Parser:
                         break
 
     def code_gen(self, symbol, token):
-        if self.scanner.error_flag:
-            return
+        # if self.scanner.error_flag:
+        #     return
         self.code_generator.token = token
         print(symbol, token)
         if symbol == 'init':
@@ -481,6 +481,10 @@ class Parser:
             self.semantic_analyzer.index_array_pop()
         elif action == '#S_save_arg':
             self.semantic_analyzer.save_arg(token)
+        elif action == '#S_in_until':
+            self.semantic_analyzer.in_until()
+        elif action == '#S_out_until':
+            self.semantic_analyzer.out_until()
 
     def add_error(self, error):
         self.errors.append((self.scanner.current_line, error))

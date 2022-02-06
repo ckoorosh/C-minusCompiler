@@ -16,21 +16,14 @@ class SemanticAnalyzer:
             "fun_check": [],
         }
 
-        # flags
         self.main_found = False
         self.main_not_last = False
 
-        # counters
-        self.arity_counter = 0
-        self.while_counter = 0
-        self.switch_counter = 0
+        self.until_count = 0
 
-        # lists
         self.fun_param_list = []
         self.fun_arg_list = []
         self.semantic_errors = []
-
-        self.semantic_error_file = os.path.join(script_dir, "errors", "semantic_errors.txt")
 
     def in_scope(self):
         self.scanner.scope_stack.append(len(self.scanner.symbol_table))
@@ -75,6 +68,9 @@ class SemanticAnalyzer:
         scope = self.get_scope()
         if input_token[0].name == "ID" and self.semantic_stacks["type_assign"]:
             symbol_idx = input_token[1]
+            symbol_row = self.scanner.symbol_table[self.scanner.find_address(symbol_idx, scope)]
+            if "fnuc/var" in symbol_row and symbol_row["fnuc/var"] == "global_var":
+                return
             self.scanner.symbol_table[self.scanner.find_address(symbol_idx, scope)]["type"] = \
                 self.semantic_stacks["type_assign"].pop()
             self.semantic_stacks["type_assign"].append(symbol_idx)
@@ -96,6 +92,8 @@ class SemanticAnalyzer:
         if self.semantic_stacks["type_assign"]:
             symbol_idx = self.semantic_stacks["type_assign"][-1]
             symbol_row = self.scanner.symbol_table[self.scanner.find_address(symbol_idx, scope)]
+            if "fnuc/var" in symbol_row and symbol_row["fnuc/var"] == "global_var":
+                return
             symbol_row["fnuc/var"] = role
             if self.scope == 0:
                 symbol_row["fnuc/var"] = "global_var"
@@ -155,9 +153,9 @@ class SemanticAnalyzer:
         if self.semantic_stacks["type_assign"]:
             symbol_idx = self.semantic_stacks["type_assign"].pop()
             params = self.fun_param_list
-            self.scanner.symbol_table[self.scanner.find_address(symbol_idx, scope)][
+            self.scanner.symbol_table[self.scanner.find_address(symbol_idx, scope - 1)][
                 "no.Args"] = len(params)
-            self.scanner.symbol_table[self.scanner.find_address(symbol_idx, scope)]["params"] = params
+            self.scanner.symbol_table[self.scanner.find_address(symbol_idx, scope - 1)]["params"] = params
             self.fun_param_list = []
             self.code_generator.stack.append(0)
 
@@ -208,13 +206,16 @@ class SemanticAnalyzer:
                                                          f"Mismatch in type of argument {i} of '{lexeme}'. Expected '{param}' but got '{arg}' instead."))
                         i += 1
 
-    def check_break(self, line_number):  # TODO
-        if self.while_counter <= 0 and self.switch_counter <= 0:
+    def in_until(self):
+        self.until_count += 1
+
+    def out_until(self):
+        self.until_count -= 1
+
+    def check_break(self, line_number):
+        if self.until_count <= 0:
             self.scanner.error_flag = True
             self.semantic_errors.append((line_number, "No 'repeat ... until' found for 'break'."))
-
-    def pop_switch(self):
-        self.switch_counter -= 1
 
     def save_type_check(self, input_token):
         scope = self.get_scope()
@@ -228,14 +229,15 @@ class SemanticAnalyzer:
     def index_array(self):
         if self.semantic_stacks["type_check"]:
             self.semantic_stacks["type_check"][-1] = "int"
-            self.code_generator.index_array = True
+            self.code_generator.index_array += 1
             if self.scanner.arg_list_stack:
                 self.scanner.arg_list_stack[-1][-1] = "int"
 
     def index_array_pop(self):
         if self.semantic_stacks["type_check"]:
             self.semantic_stacks["type_check"].pop()
-            self.code_generator.index_array = False
+            self.code_generator.index_array -= 1
+            self.code_generator.assign_array()
 
     def type_check(self, line_number):
         try:

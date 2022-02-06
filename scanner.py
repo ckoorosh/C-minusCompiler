@@ -368,7 +368,18 @@ class Scanner:
 
     def find_address(self, lexeme, scope):
         for i in range(len(self.symbol_table)):
-            if self.symbol_table[i]["lexeme"] == lexeme and self.symbol_table[i]["scope"] <= scope:
-                return i
-
+            if self.symbol_table[i]["lexeme"] == lexeme:
+                if "fnuc/var" in self.symbol_table[i]:
+                    if self.symbol_table[i]["fnuc/var"] == "function":
+                        if self.symbol_table[i]["scope"] <= scope:
+                            return i
+                    elif self.symbol_table[i]["fnuc/var"] == "global_var":
+                        if self.symbol_table[i]["scope"] <= scope:
+                            return i
+                    else:
+                        if self.symbol_table[i]["scope"] == scope:
+                            return i
+                else:
+                    if self.symbol_table[i]["scope"] == scope:
+                        return i
         return -1
