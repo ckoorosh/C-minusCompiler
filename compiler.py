@@ -13,4 +13,4 @@ def main(input_path):
 
 
 if __name__ == '__main__':
-    main('input2.txt')
+    main('input.txt')
